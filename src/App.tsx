@@ -1,4 +1,3 @@
-// src/App.tsx
 import { useState, useMemo } from 'react';
 import GameMap from './components/GameMap';
 import Sidebar from './components/SideBar';
