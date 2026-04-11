@@ -1,17 +1,38 @@
 @import "tailwindcss";
 
-/* Keep your custom layout fixes below */
-html, body, #root {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background-color: #000;
+/* src/index.css */
+
+/* 1. Force the map container to stay black */
+.leaflet-container {
+  background: #000000 !important;
+  outline: none;
 }
 
-.leaflet-container {
-  height: 100vh;
-  width: 100vw;
-  z-index: 1;
+/* 2. Style the hover Tooltip (the white box) */
+.leaflet-tooltip.custom-tooltip {
+  background-color: #0A0A0A !important;
+  border: 1px solid #1A1A1A !important;
+  color: #E0E0E0 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+  padding: 4px 8px !important;
+  border-radius: 0px !important; /* Sharp corners for minimalism */
+}
+
+/* 3. Remove the little "beak/arrow" of the tooltip or color it */
+.leaflet-tooltip-top.custom-tooltip::before {
+  border-top-color: #1A1A1A !important;
+}
+
+/* 4. Fix for the Popup (if any white remains) */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: #0A0A0A !important;
+  color: #E0E0E0 !important;
+  border-radius: 0px !important;
+  border: 1px solid #1A1A1A;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* 5. Hide the default zoom controls if you haven't already */
+.leaflet-control-zoom {
+  display: none !important;
 }

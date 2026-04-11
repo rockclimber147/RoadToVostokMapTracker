@@ -1,21 +1,21 @@
+// src/components/GameMap.tsx
 import { useState } from 'react';
 import { MapContainer, ImageOverlay, Marker, Tooltip, useMapEvents } from 'react-leaflet';
 import L, { LatLng } from 'leaflet';
 import { type Pin, type PinColor } from '../types';
 import PinPopup from './PinPopup';
+import ContextMenu from './ContextMenu';
 import { createColoredIcon } from '../utils/icons';
 import 'leaflet/dist/leaflet.css';
 
 interface Props {
   pins: Pin[];
   activeMapUrl: string;
-  onAddPin: (latlng: LatLng, color: PinColor) => void; // Added color param
+  onAddPin: (latlng: LatLng, color: PinColor) => void;
   onUpdatePin: (id: string, updates: Partial<Pin>) => void;
   onDeletePin: (id: string) => void;
   visibleColors: Set<PinColor>;
 }
-
-const COLORS: PinColor[] = ['red', 'yellow', 'orange', 'green', 'blue', 'violet'];
 
 export default function GameMap({ 
   pins, 
@@ -25,89 +25,87 @@ export default function GameMap({
   onDeletePin,
   visibleColors 
 }: Props) {
+  // Recommendation: Set bounds to actual image resolution if known (e.g., [[0,0], [2160, 3840]])
   const bounds: L.LatLngBoundsExpression = [[0, 0], [1000, 1000]];
-  const [contextMenu, setContextMenu] = useState<{ latlng: LatLng, x: number, y: number } | null>(null);
+  const [menu, setMenu] = useState<{ latlng: LatLng, x: number, y: number } | null>(null);
 
   function MapEvents() {
     useMapEvents({
       contextmenu: (e) => {
-        setContextMenu({
+        setMenu({
           latlng: e.latlng,
           x: e.originalEvent.clientX,
           y: e.originalEvent.clientY
         });
       },
       click: () => {
-        if (contextMenu) setContextMenu(null);
+        if (menu) setMenu(null);
       },
       movestart: () => {
-        if (contextMenu) setContextMenu(null);
-      }
+        if (menu) setMenu(null);
+      },
     });
     return null;
   }
 
-  const handleSelectColor = (color: PinColor) => {
-    if (contextMenu) {
-      onAddPin(contextMenu.latlng, color);
-      setContextMenu(null);
-    }
-  };
-
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full bg-black overflow-hidden">
       <MapContainer 
         crs={L.CRS.Simple} 
         bounds={bounds} 
-        style={{ height: '100vh', width: '100%', background: '#1a1a1a' }}
+        className="h-screen w-screen bg-black"
         maxBounds={bounds}
+        zoomControl={false}
+        attributionControl={true}
       >
         <ImageOverlay url={activeMapUrl} bounds={bounds} />
         <MapEvents />
         
         {pins
-        .filter(pin => visibleColors.has(pin.color))
-        .map((pin) => (
+          .filter(pin => visibleColors.has(pin.color))
+          .map((pin) => (
             <Marker 
-            key={pin.id} 
-            position={pin.pos}
-            icon={createColoredIcon(pin.color)} // Use the colored icon here
+              key={pin.id} 
+              position={pin.pos}
+              icon={createColoredIcon(pin.color)}
             >
-            <Tooltip direction="top" offset={[0, -20]} opacity={1}>
-                <strong>{pin.label || 'No Label'}</strong>
-                {pin.notes && <p className="text-xs m-0">{pin.notes}</p>}
-            </Tooltip>
-            <PinPopup 
+              <Tooltip 
+                direction="top" 
+                offset={[0, -20]} 
+                opacity={1}
+                className="custom-tooltip"
+              >
+                <div className="px-1 py-0.5">
+                  <div className="text-[10px] font-black tracking-[0.15em] uppercase text-[#E0E0E0]">
+                    {pin.label || ''}
+                  </div>
+                  {pin.notes && (
+                    <div className="text-[9px] mt-1 opacity-50 tracking-wide lowercase italic border-t border-white/10 pt-1">
+                      {pin.notes}
+                    </div>
+                  )}
+                </div>
+              </Tooltip>
+              <PinPopup 
                 pin={pin} 
                 onUpdatePin={onUpdatePin} 
                 onDeletePin={onDeletePin} 
-            />
+              />
             </Marker>
         ))}
       </MapContainer>
 
-      {/* Custom Context Menu Overlay */}
-      {contextMenu && (
-        <div 
-          className="fixed z-[2000] bg-slate-900 border border-slate-700 rounded-md shadow-xl p-2 flex flex-col gap-1 min-w-[140px]"
-          style={{ top: contextMenu.y, left: contextMenu.x }}
-          /* Requirement: Close when the mouse stops hovering */
-          onMouseLeave={() => setContextMenu(null)}
-        >
-          {COLORS.map((color) => (
-            <button
-              key={color}
-              onClick={() => handleSelectColor(color)}
-              className="flex items-center gap-2 hover:bg-white hover:bg-opacity-10 px-2 py-1.5 rounded transition-all text-white text-sm text-left"
-            >
-              <div 
-                className="w-3 h-3 rounded-full border border-black border-opacity-20" 
-                style={{ backgroundColor: color }}
-              ></div>
-              <span className="capitalize font-medium">{color}</span>
-            </button>
-          ))}
-        </div>
+      {/* Deploy Menu */}
+      {menu && (
+        <ContextMenu 
+          x={menu.x} 
+          y={menu.y} 
+          onClose={() => setMenu(null)}
+          onSelectColor={(color) => {
+            onAddPin(menu.latlng, color);
+            setMenu(null);
+          }}
+        />
       )}
     </div>
   );
