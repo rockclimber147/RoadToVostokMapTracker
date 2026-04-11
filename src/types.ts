@@ -1,4 +1,4 @@
-export type PinColor = 'red' | 'yellow' | 'orange' | 'green' | 'blue' | 'violet';
+export type PinColor = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'violet';
 
 export interface Pin {
   id: string; // Use crypto.randomUUID()

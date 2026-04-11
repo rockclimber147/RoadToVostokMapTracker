@@ -1,15 +1,17 @@
-import { MapContainer, ImageOverlay, Marker, Popup, Tooltip, useMapEvents } from 'react-leaflet';
+// src/components/GameMap.tsx
+import { MapContainer, ImageOverlay, Marker, Tooltip, useMapEvents } from 'react-leaflet';
 import L, { LatLng } from 'leaflet';
 import { type Pin, type PinColor } from '../types';
+import PinPopup from './PinPopup'; // Import our new component
 import 'leaflet/dist/leaflet.css';
 
 interface Props {
   pins: Pin[];
-  activeMapUrl: string; // Dynamic map image
+  activeMapUrl: string;
   onAddPin: (latlng: LatLng) => void;
   onUpdatePin: (id: string, updates: Partial<Pin>) => void;
   onDeletePin: (id: string) => void;
-  visibleColors: Set<PinColor>; // For the expand/collapse logic
+  visibleColors: Set<PinColor>;
 }
 
 function MapEvents({ onAddPin }: { onAddPin: (latlng: LatLng) => void }) {
@@ -40,41 +42,20 @@ export default function GameMap({
       <MapEvents onAddPin={onAddPin} />
       
       {pins
-        .filter(pin => visibleColors.has(pin.color)) // Handle expand/collapse
+        .filter(pin => visibleColors.has(pin.color))
         .map((pin) => (
-          <Marker 
-            key={pin.id} 
-            position={pin.pos}
-          >
+          <Marker key={pin.id} position={pin.pos}>
             <Tooltip direction="top" offset={[0, -20]} opacity={1}>
               <strong>{pin.label || 'No Label'}</strong>
-              {pin.notes && <p style={{ fontSize: '0.8rem' }}>{pin.notes}</p>}
+              {pin.notes && <p className="text-xs m-0">{pin.notes}</p>}
             </Tooltip>
 
-            <Popup>
-              <div className="pin-editor">
-                <input 
-                  value={pin.label}
-                  placeholder="Label"
-                  onChange={(e) => onUpdatePin(pin.id, { label: e.target.value })}
-                />
-                <textarea 
-                  value={pin.notes}
-                  placeholder="Notes..."
-                  onChange={(e) => onUpdatePin(pin.id, { notes: e.target.value })}
-                />
-                <select 
-                  value={pin.color} 
-                  onChange={(e) => onUpdatePin(pin.id, { color: e.target.value as PinColor })}
-                >
-                  <option value="red">Red</option>
-                  <option value="yellow">Yellow</option>
-                  <option value="green">Green</option>
-                  {/* ... other colors */}
-                </select>
-                <button onClick={() => onDeletePin(pin.id)}>Delete</button>
-              </div>
-            </Popup>
+            {/* Clean delegation of logic */}
+            <PinPopup 
+              pin={pin} 
+              onUpdatePin={onUpdatePin} 
+              onDeletePin={onDeletePin} 
+            />
           </Marker>
       ))}
     </MapContainer>
