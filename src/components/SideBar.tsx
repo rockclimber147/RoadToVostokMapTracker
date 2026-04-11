@@ -25,12 +25,12 @@ export default function Sidebar({
 
   return (
     <div 
-      className={`fixed top-0 left-0 h-full z-[1001] transition-transform duration-300 ease-in-out flex ${
-        isOpen ? 'translate-x-0' : '-translate-x-64'
+      className={`fixed top-0 right-0 h-full z-[1001] transition-transform duration-300 ease-in-out flex flex-row-reverse ${
+        isOpen ? 'translate-x-0' : 'translate-x-64'
       }`}
     >
       {/* Sidebar Content */}
-      <div className="w-64 bg-slate-900 bg-opacity-80 backdrop-blur-md text-white p-4 flex flex-col gap-6 border-r border-slate-700">
+      <div className="w-64 bg-slate-900 bg-opacity-80 backdrop-blur-md text-white p-4 flex flex-col gap-6 border-l border-slate-700">
         <h1 className="text-xl font-bold border-b border-slate-700 pb-2">Map Tracker</h1>
 
         <section>
@@ -40,9 +40,13 @@ export default function Sidebar({
             onChange={(e) => setActiveMap(e.target.value)}
             className="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
-            <option value="map1">Main World</option>
-            <option value="map2">Underground</option>
-            {/* ... other maps */}
+            <option value="map1">Village</option>
+            <option value="map2">Highway</option>
+            <option value="map3">School</option>
+            <option value="map4">Outpost</option>
+            <option value="map5">Minefield</option>
+            <option value="map6">Apartments</option>
+            <option value="map7">Terminal</option>
           </select>
         </section>
 
@@ -66,23 +70,25 @@ export default function Sidebar({
 
         <section className="mt-auto flex flex-col gap-2">
           <button onClick={onExport} className="w-full bg-blue-600 hover:bg-blue-500 text-xs font-bold py-2 rounded uppercase tracking-wider transition-colors">
-            Copy All Data
+            Copy Pins to Clipboard
           </button>
           <button onClick={onImport} className="w-full bg-slate-700 hover:bg-slate-600 text-xs font-bold py-2 rounded uppercase tracking-wider transition-colors border border-slate-600">
-            Import Data
+            Import Pins From Clipboard
           </button>
         </section>
       </div>
 
-      {/* Toggle Tab */}
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="h-12 w-8 bg-slate-900 bg-opacity-80 backdrop-blur-md border-r border-t border-b border-slate-700 mt-4 flex items-center justify-center rounded-r-md hover:bg-slate-800 transition-colors"
-      >
-        <span className="text-white text-lg font-bold">
-          {isOpen ? '‹' : '›'}
-        </span>
-      </button>
+      {/* Toggle Tab - Now on the left side of the sidebar */}
+      <div className="pt-4">
+        <button 
+          onClick={() => setIsOpen(!isOpen)}
+          className="h-12 w-8 bg-slate-900 bg-opacity-80 backdrop-blur-md border-l border-t border-b border-slate-700 flex items-center justify-center rounded-l-md hover:bg-slate-800 transition-colors"
+        >
+          <span className="text-white text-lg font-bold">
+            {isOpen ? '>' : '<'}
+          </span>
+        </button>
+      </div>
     </div>
   );
 }
