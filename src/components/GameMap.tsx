@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { MapContainer, ImageOverlay, Marker, Tooltip, useMapEvents } from 'react-leaflet';
 import L, { LatLng } from 'leaflet';
 import { type Pin, type PinColor } from '../types';
+import { GAME_MAPS } from '../constants/maps';
 import PinPopup from './PinPopup';
 import ContextMenu from './ContextMenu';
 import { createColoredIcon } from '../utils/icons';
@@ -10,7 +11,7 @@ import 'leaflet/dist/leaflet.css';
 
 interface Props {
   pins: Pin[];
-  activeMapUrl: string;
+  activeMapId: string; // Changed from activeMapUrl to use the ID for lookup
   onAddPin: (latlng: LatLng, color: PinColor) => void;
   onUpdatePin: (id: string, updates: Partial<Pin>) => void;
   onDeletePin: (id: string) => void;
@@ -19,14 +20,15 @@ interface Props {
 
 export default function GameMap({ 
   pins, 
-  activeMapUrl, 
+  activeMapId, 
   onAddPin, 
   onUpdatePin, 
   onDeletePin,
   visibleColors 
 }: Props) {
-  // Recommendation: Set bounds to actual image resolution if known (e.g., [[0,0], [2160, 3840]])
-  const bounds: L.LatLngBoundsExpression = [[0, 0], [1000, 1000]];
+  const mapData = GAME_MAPS[activeMapId] || GAME_MAPS['map1'];
+  const bounds: L.LatLngBoundsExpression = [[0, 0], [mapData.height, mapData.width]];
+  
   const [menu, setMenu] = useState<{ latlng: LatLng, x: number, y: number } | null>(null);
 
   function MapEvents() {
@@ -51,14 +53,15 @@ export default function GameMap({
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
       <MapContainer 
+        key={activeMapId} // CRITICAL: Forces map re-mount when switching sectors
         crs={L.CRS.Simple} 
         bounds={bounds} 
         className="h-screen w-screen bg-black"
         maxBounds={bounds}
         zoomControl={false}
-        attributionControl={true}
+        attributionControl={false} // Minimalist look
       >
-        <ImageOverlay url={activeMapUrl} bounds={bounds} />
+        <ImageOverlay url={mapData.url} bounds={bounds} />
         <MapEvents />
         
         {pins

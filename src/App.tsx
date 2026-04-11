@@ -75,7 +75,7 @@ export default function App() {
       
       <GameMap 
         pins={currentPins}
-        activeMapUrl={`/maps/${activeMap}.jpg`}
+        activeMapId={activeMap}
         onAddPin={handleAddPin}
         onUpdatePin={handleUpdatePin}
         onDeletePin={handleDeletePin}

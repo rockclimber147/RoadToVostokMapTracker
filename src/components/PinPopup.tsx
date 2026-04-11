@@ -12,7 +12,11 @@ const COLORS: PinColor[] = ['red', 'orange', 'yellow', 'green', 'blue', 'violet'
 
 export default function PinPopup({ pin, onUpdatePin, onDeletePin }: PinPopupProps) {
   return (
-    <Popup className="custom-dark-popup">
+    <Popup 
+      className="custom-dark-popup"
+      autoPan={true}
+      autoPanPadding={[50, 50]}
+    >
       <div className="flex flex-col gap-4 min-w-[220px] bg-[#0A0A0A] text-[#E0E0E0] p-2">
         {/* Label Input */}
         <div className="space-y-1">
@@ -58,7 +62,7 @@ export default function PinPopup({ pin, onUpdatePin, onDeletePin }: PinPopupProp
             className="w-full text-[9px] font-bold tracking-[0.2em] py-2 border border-red-900/30 text-red-500 hover:bg-red-500 hover:text-white transition-all uppercase"
             onClick={() => onDeletePin(pin.id)}
           >
-            Purge Pin
+            Delete
           </button>
         </div>
       </div>

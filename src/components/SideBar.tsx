@@ -1,6 +1,7 @@
 // src/components/Sidebar.tsx
 import { useState } from 'react';
 import { type PinColor } from '../types';
+import { MAP_LIST } from '../constants/maps';
 
 interface SidebarProps {
   activeMap: string;
@@ -11,7 +12,7 @@ interface SidebarProps {
   onImport: () => void;
 }
 
-const COLORS: PinColor[] = ['red', 'yellow', 'orange', 'green', 'blue', 'violet'];
+const COLORS: PinColor[] = ['red', 'orange', 'yellow', 'green', 'blue', 'violet'];
 
 export default function Sidebar({
   activeMap,
@@ -30,39 +31,43 @@ export default function Sidebar({
       }`}
     >
       {/* Sidebar Content */}
-      <div className="w-64 bg-[#0A0A0A]/90 backdrop-blur-xl text-[#E0E0E0] p-6 flex flex-col gap-8 border-l border-[#1A1A1A] shadow-2xl">
+      <div className="w-64 bg-[#050505]/95 backdrop-blur-xl text-[#E0E0E0] p-6 flex flex-col gap-8 border-l border-[#1A1A1A] shadow-2xl overflow-y-auto">
         
         {/* Minimalist Header */}
         <header className="space-y-1">
-          <h1 className="text-[10px] font-black tracking-[0.3em] uppercase opacity-40">Map Tracker</h1>
+          <h1 className="text-[10px] font-black tracking-[0.3em] uppercase opacity-40">System.Link</h1>
           <div className="h-[1px] w-full bg-gradient-to-r from-[#1A1A1A] to-transparent" />
         </header>
 
-        {/* Map Selection */}
+        {/* Tactical Map Selection (Multi-select style) */}
         <section className="space-y-3">
-          <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-30">Location</h2>
-          <div className="relative group">
-            <select 
-              value={activeMap} 
-              onChange={(e) => setActiveMap(e.target.value)}
-              className="w-full bg-[#121212] border border-[#1A1A1A] rounded-none p-2 text-xs font-medium tracking-wide focus:outline-none focus:border-[#404040] transition-colors appearance-none cursor-pointer"
-            >
-              <option value="map1">VILLAGE</option>
-              <option value="map2">HIGHWAY</option>
-              <option value="map3">SCHOOL</option>
-              <option value="map4">OUTPOST</option>
-              <option value="map5">MINEFIELD</option>
-              <option value="map6">APARTMENTS</option>
-              <option value="map7">TERMINAL</option>
-            </select>
-            {/* Custom chevron for select */}
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-30 text-[8px]">▼</div>
-          </div>
+            <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-30">Sector Selection</h2>
+            <div className="flex flex-col border border-[#1A1A1A]">
+                {MAP_LIST.map((map) => {
+                const isActive = activeMap === map.id;
+                return (
+                    <button
+                    key={map.id}
+                    onClick={() => setActiveMap(map.id)}
+                    className={`
+                        w-full text-left px-3 py-2.5 text-[10px] font-bold tracking-widest transition-all duration-200
+                        border-b border-[#1A1A1A] last:border-b-0
+                        ${isActive 
+                        ? 'bg-[#E0E0E0] text-black' 
+                        : 'bg-transparent text-[#E0E0E0] opacity-40 hover:opacity-100 hover:bg-[#121212]'
+                        }
+                    `}
+                    >
+                    {map.label}
+                    </button>
+                );
+                })}
+            </div>
         </section>
 
         {/* Filter Buttons */}
         <section className="space-y-4">
-          <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-30">Filters</h2>
+          <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-30">Signal Filters</h2>
           <div className="grid grid-cols-3 gap-4 justify-items-center">
             {COLORS.map(color => {
               const isActive = visibleColors.has(color);
@@ -70,11 +75,10 @@ export default function Sidebar({
                 <button
                   key={color}
                   onClick={() => onToggleColor(color)}
-                  title={`Toggle ${color}`}
                   className={`
                     w-8 h-8 rounded-full transition-all duration-300 border border-white/5
                     ${isActive 
-                      ? 'opacity-100 scale-110 ring-1 ring-white/20 ring-offset-4 ring-offset-[#0A0A0A]' 
+                      ? 'opacity-100 scale-110 ring-1 ring-white/20 ring-offset-4 ring-offset-[#050505]' 
                       : 'opacity-10 grayscale scale-90'
                     }
                   `}
@@ -89,15 +93,15 @@ export default function Sidebar({
         <footer className="mt-auto space-y-2">
           <button 
             onClick={onExport} 
-            className="w-full text-[9px] font-bold tracking-[0.2em] border border-[#1A1A1A] py-3 hover:bg-[#E0E0E0] hover:text-black transition-all uppercase"
+            className="w-full text-[9px] font-bold tracking-[0.2em] border border-[#1A1A1A] py-3 hover:bg-blue-900/20 hover:border-blue-500/50 transition-all uppercase"
           >
-            Export JSON
+            Export Archive
           </button>
           <button 
             onClick={onImport} 
-            className="w-full text-[9px] font-bold tracking-[0.2em] border border-[#1A1A1A] py-3 hover:bg-[#E0E0E0] hover:text-black transition-all uppercase opacity-40 hover:opacity-100"
+            className="w-full text-[9px] font-bold tracking-[0.2em] border border-[#1A1A1A] py-3 hover:bg-green-900/20 hover:border-green-500/50 transition-all uppercase opacity-40 hover:opacity-100"
           >
-            Import JSON
+            Load Uplink
           </button>
         </footer>
       </div>
@@ -106,7 +110,7 @@ export default function Sidebar({
       <div className="self-center">
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="h-20 w-6 bg-[#0A0A0A]/90 backdrop-blur-xl border-l border-t border-b border-[#1A1A1A] flex items-center justify-center rounded-l-sm hover:bg-black transition-colors group"
+          className="h-20 w-6 bg-[#050505]/95 backdrop-blur-xl border-l border-t border-b border-[#1A1A1A] flex items-center justify-center rounded-l-sm hover:bg-black transition-colors group"
         >
           <span className={`text-[10px] text-[#E0E0E0] transition-transform duration-500 ${isOpen ? '' : 'rotate-180'}`}>
             →
