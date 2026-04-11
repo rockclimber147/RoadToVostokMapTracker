@@ -3,6 +3,7 @@ import { MapContainer, ImageOverlay, Marker, Tooltip, useMapEvents } from 'react
 import L, { LatLng } from 'leaflet';
 import { type Pin, type PinColor } from '../types';
 import PinPopup from './PinPopup';
+import { createColoredIcon } from '../utils/icons';
 import 'leaflet/dist/leaflet.css';
 
 interface Props {
@@ -65,18 +66,22 @@ export default function GameMap({
         <MapEvents />
         
         {pins
-          .filter(pin => visibleColors.has(pin.color))
-          .map((pin) => (
-            <Marker key={pin.id} position={pin.pos}>
-              <Tooltip direction="top" offset={[0, -20]} opacity={1}>
+        .filter(pin => visibleColors.has(pin.color))
+        .map((pin) => (
+            <Marker 
+            key={pin.id} 
+            position={pin.pos}
+            icon={createColoredIcon(pin.color)} // Use the colored icon here
+            >
+            <Tooltip direction="top" offset={[0, -20]} opacity={1}>
                 <strong>{pin.label || 'No Label'}</strong>
                 {pin.notes && <p className="text-xs m-0">{pin.notes}</p>}
-              </Tooltip>
-              <PinPopup 
+            </Tooltip>
+            <PinPopup 
                 pin={pin} 
                 onUpdatePin={onUpdatePin} 
                 onDeletePin={onDeletePin} 
-              />
+            />
             </Marker>
         ))}
       </MapContainer>
