@@ -28,7 +28,10 @@ export default function GameMap({
 }: Props) {
   const mapData = GAME_MAPS[activeMapId] || GAME_MAPS['map1'];
   const bounds: L.LatLngBoundsExpression = [[0, 0], [mapData.height, mapData.width]];
-  
+  const paddedMaxBounds: L.LatLngBoundsExpression = [
+    [-mapData.height * 0.5, -mapData.width * 0.5], 
+    [mapData.height * 1.5, mapData.width * 1.5]
+  ];
   const [menu, setMenu] = useState<{ latlng: LatLng, x: number, y: number } | null>(null);
 
   function MapEvents() {
@@ -57,8 +60,11 @@ export default function GameMap({
         crs={L.CRS.Simple} 
         bounds={bounds} 
         className="h-screen w-screen bg-black"
-        maxBounds={bounds}
+        maxBounds={paddedMaxBounds}
+        maxBoundsViscosity={0.5}
         zoomControl={false}
+        minZoom={-2}
+
         attributionControl={false} // Minimalist look
       >
         <ImageOverlay url={mapData.url} bounds={bounds} />
