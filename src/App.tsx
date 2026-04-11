@@ -18,11 +18,11 @@ export default function App() {
     setAllMapData({ ...allMapData, [activeMap]: newPins });
   };
 
-  const handleAddPin = (latlng: LatLng) => {
+  const handleAddPin = (latlng: LatLng, color: PinColor) => {
     const newPin: Pin = {
       id: crypto.randomUUID(),
       pos: [latlng.lat, latlng.lng],
-      color: 'red',
+      color: color, // Use the passed color
       label: '',
       notes: '',
       isVisible: true
