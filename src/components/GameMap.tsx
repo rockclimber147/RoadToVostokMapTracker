@@ -94,9 +94,6 @@ export default function GameMap({
           /* Requirement: Close when the mouse stops hovering */
           onMouseLeave={() => setContextMenu(null)}
         >
-          <p className="text-[10px] uppercase font-bold text-slate-500 px-2 pt-1 pb-1 border-b border-slate-800 mb-1">
-            New Pin Color
-          </p>
           {COLORS.map((color) => (
             <button
               key={color}

@@ -1,4 +1,3 @@
-// src/components/Sidebar.tsx
 import { useState } from 'react';
 import { type PinColor } from '../types';
 
@@ -34,7 +33,7 @@ export default function Sidebar({
         <h1 className="text-xl font-bold border-b border-slate-700 pb-2">Map Tracker</h1>
 
         <section>
-          <h2 className="text-xs font-semibold text-slate-400 uppercase mb-2">Active Map</h2>
+          <h2 className="text-xs font-semibold text-slate-400 uppercase mb-3">Active Map</h2>
           <select 
             value={activeMap} 
             onChange={(e) => setActiveMap(e.target.value)}
@@ -51,34 +50,48 @@ export default function Sidebar({
         </section>
 
         <section>
-          <h2 className="text-xs font-semibold text-slate-400 uppercase mb-2">Toggle Visibility</h2>
-          <div className="grid grid-cols-1 gap-1">
-            {COLORS.map(color => (
-              <label key={color} className="flex items-center gap-2 cursor-pointer hover:bg-white hover:bg-opacity-10 p-1.5 rounded transition-all">
-                <input 
-                  type="checkbox" 
-                  checked={visibleColors.has(color)} 
-                  onChange={() => onToggleColor(color)}
-                  className="w-4 h-4 rounded border-slate-600 bg-slate-700 checked:bg-blue-500"
+          <h2 className="text-xs font-semibold text-slate-400 uppercase mb-3">Filter Pins</h2>
+          {/* Grid of color-only toggle buttons */}
+          <div className="grid grid-cols-3 gap-3">
+            {COLORS.map(color => {
+              const isActive = visibleColors.has(color);
+              return (
+                <button
+                  key={color}
+                  onClick={() => onToggleColor(color)}
+                  title={`Toggle ${color} pins`}
+                  className={`
+                    w-12 h-12 rounded-full transition-all duration-200 
+                    border-2 border-white border-opacity-20
+                    ${isActive 
+                      ? 'opacity-100 scale-100 ring-2 ring-blue-400 ring-offset-2 ring-offset-slate-900' 
+                      : 'opacity-30 scale-90 grayscale-[50%]'
+                    }
+                  `}
+                  style={{ backgroundColor: color }}
                 />
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }}></div>
-                <span className="text-sm capitalize">{color}</span>
-              </label>
-            ))}
+              );
+            })}
           </div>
         </section>
 
         <section className="mt-auto flex flex-col gap-2">
-          <button onClick={onExport} className="w-full bg-blue-600 hover:bg-blue-500 text-xs font-bold py-2 rounded uppercase tracking-wider transition-colors">
+          <button 
+            onClick={onExport} 
+            className="w-full bg-blue-600 hover:bg-blue-500 text-[10px] font-bold py-2 rounded uppercase tracking-tighter transition-colors"
+          >
             Copy Pins to Clipboard
           </button>
-          <button onClick={onImport} className="w-full bg-slate-700 hover:bg-slate-600 text-xs font-bold py-2 rounded uppercase tracking-wider transition-colors border border-slate-600">
-            Import Pins From Clipboard
+          <button 
+            onClick={onImport} 
+            className="w-full bg-slate-700 hover:bg-slate-600 text-[10px] font-bold py-2 rounded uppercase tracking-tighter transition-colors border border-slate-600"
+          >
+            Import From Clipboard
           </button>
         </section>
       </div>
 
-      {/* Toggle Tab - Now on the left side of the sidebar */}
+      {/* Toggle Tab */}
       <div className="pt-4">
         <button 
           onClick={() => setIsOpen(!isOpen)}
