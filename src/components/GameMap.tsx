@@ -12,10 +12,10 @@ import 'leaflet/dist/leaflet.css';
 interface Props {
   pins: Pin[];
   activeMapId: string;
-  onAddPin: (latlng: LatLng, color: PinColor) => void;
+  onAddPin: (latlng: LatLng, color: PinColor, id: string) => void; // Updated signature
   onUpdatePin: (id: string, updates: Partial<Pin>) => void;
   onDeletePin: (id: string) => void;
-  colorStates: Record<PinColor, number>; // Updated to handle tri-state
+  colorStates: Record<PinColor, number>;
 }
 
 export default function GameMap({ 
@@ -29,13 +29,22 @@ export default function GameMap({
   const mapData = GAME_MAPS[activeMapId] || GAME_MAPS['map1'];
   const bounds: L.LatLngBoundsExpression = [[0, 0], [mapData.height, mapData.width]];
   
-  // Dynamic buffer zone for panning
   const paddedMaxBounds: L.LatLngBoundsExpression = [
     [-mapData.height * 0.5, -mapData.width * 0.5], 
     [mapData.height * 1.5, mapData.width * 1.5]
   ];
 
   const [menu, setMenu] = useState<{ latlng: LatLng, x: number, y: number } | null>(null);
+  
+  // Track the ID of the pin we just added to trigger the popup
+  const [newestPinId, setNewestPinId] = useState<string | null>(null);
+
+  const handleDeployPin = (latlng: LatLng, color: PinColor) => {
+    const id = crypto.randomUUID();
+    setNewestPinId(id);
+    onAddPin(latlng, color, id);
+    setMenu(null);
+  };
 
   function MapEvents() {
     useMapEvents({
@@ -46,12 +55,8 @@ export default function GameMap({
           y: e.originalEvent.clientY
         });
       },
-      click: () => {
-        if (menu) setMenu(null);
-      },
-      movestart: () => {
-        if (menu) setMenu(null);
-      },
+      click: () => { if (menu) setMenu(null); },
+      movestart: () => { if (menu) setMenu(null); },
     });
     return null;
   }
@@ -80,49 +85,53 @@ export default function GameMap({
 
             return (
             <Marker 
-                key={`${pin.id}-${isFullState}`} // ADD isFullState TO THE KEY
+                key={`${pin.id}-${isFullState}`} 
                 position={pin.pos}
                 icon={createColoredIcon(pin.color)}
+                eventHandlers={{
+                  add: (e) => {
+                    if (pin.id === newestPinId) {
+                      e.target.openPopup();
+                      setNewestPinId(null);
+                    }
+                  }
+                }}
             >
                 <Tooltip 
-                key={`tooltip-${pin.id}-${isFullState}`} // ADD KEY HERE TOO
-                direction="top" 
-                offset={[0, -20]} 
-                opacity={1}
-                permanent={isFullState} 
-                className="custom-tooltip"
+                  key={`tooltip-${pin.id}-${isFullState}`} 
+                  direction="top" 
+                  offset={[0, -20]} 
+                  opacity={1}
+                  permanent={isFullState} 
+                  className="custom-tooltip"
                 >
-                <div className="px-1 py-0.5">
+                  <div className="px-1 py-0.5">
                     <div className="text-[10px] font-black tracking-[0.15em] uppercase text-[#E0E0E0]">
-                    {pin.label || (isFullState ? 'UNIDENTIFIED' : '')}
+                      {pin.label || (isFullState ? 'UNIDENTIFIED' : '')}
                     </div>
                     {pin.notes && (
-                    <div className="notes-section text-[9px] mt-1 opacity-50 tracking-wide lowercase italic border-t border-white/10 pt-1">
+                      <div className="notes-section text-[9px] mt-1 opacity-50 tracking-wide lowercase italic border-t border-white/10 pt-1">
                         {pin.notes}
-                    </div>
+                      </div>
                     )}
-                </div>
+                  </div>
                 </Tooltip>
                 <PinPopup 
-                pin={pin} 
-                onUpdatePin={onUpdatePin} 
-                onDeletePin={onDeletePin} 
+                  pin={pin} 
+                  onUpdatePin={onUpdatePin} 
+                  onDeletePin={onDeletePin} 
                 />
             </Marker>
             );
         })}
       </MapContainer>
 
-      {/* Deploy Menu */}
       {menu && (
         <ContextMenu 
           x={menu.x} 
           y={menu.y} 
           onClose={() => setMenu(null)}
-          onSelectColor={(color) => {
-            onAddPin(menu.latlng, color);
-            setMenu(null);
-          }}
+          onSelectColor={(color) => handleDeployPin(menu.latlng, color)}
         />
       )}
     </div>
