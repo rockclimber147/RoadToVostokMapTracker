@@ -23,7 +23,7 @@ export default function ContextMenu({ x, y, onSelectColor, onClose }: ContextMen
             onClick={() => onSelectColor(color)}
             className="w-7 h-7 rounded-full border border-white/5 hover:scale-125 hover:border-white/20 transition-all duration-200 shadow-lg active:scale-95"
             style={{ backgroundColor: color }}
-            title={`DEPLOY ${color.toUpperCase()}`}
+            title={`Add ${color.toUpperCase()}`}
           />
         ))}
       </div>

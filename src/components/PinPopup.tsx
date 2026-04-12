@@ -28,45 +28,27 @@ export default function PinPopup({ pin, onUpdatePin, onDeletePin }: PinPopupProp
       <div className="flex flex-col gap-4 min-w-[220px] bg-[#0A0A0A] text-[#E0E0E0] p-2">
         {/* Label Input */}
         <div className="space-y-1">
-          <label className="text-[9px] font-black tracking-[0.2em] uppercase opacity-30">Label</label>
           <input 
             ref={inputRef}
             className="w-full bg-[#121212] border border-[#1A1A1A] rounded-none p-2 text-xs focus:outline-none focus:border-[#404040] transition-colors placeholder:opacity-20"
             value={pin.label}
-            placeholder="IDENTIFIER..."
+            placeholder="Label"
             onChange={(e) => onUpdatePin(pin.id, { label: e.target.value })}
           />
         </div>
 
         {/* Notes Input */}
         <div className="space-y-1">
-          <label className="text-[9px] font-black tracking-[0.2em] uppercase opacity-30">Notes</label>
           <textarea 
             className="w-full bg-[#121212] border border-[#1A1A1A] rounded-none p-2 text-xs h-20 resize-none focus:outline-none focus:border-[#404040] transition-colors placeholder:opacity-20"
             value={pin.notes}
-            placeholder="COORDINATE DATA..."
+            placeholder="Notes"
             onChange={(e) => onUpdatePin(pin.id, { notes: e.target.value })}
           />
         </div>
 
         {/* Visibility & Logic */}
         <div className="flex flex-col gap-3 pt-2 border-t border-[#1A1A1A]">
-          <div className="flex justify-between items-center">
-            <span className="text-[9px] font-black tracking-[0.2em] uppercase opacity-30">
-              Pin State
-            </span>
-            <button
-              onClick={() => onUpdatePin(pin.id, { showLabel: !pin.showLabel })}
-              className={`text-[9px] font-bold px-2 py-1 border transition-all ${
-                pin.showLabel 
-                  ? 'bg-[#E0E0E0] text-black border-[#E0E0E0]' 
-                  : 'border-[#1A1A1A] text-[#E0E0E0] opacity-40'
-              }`}
-            >
-              {pin.showLabel ? 'LABEL ON' : 'LABEL OFF'}
-            </button>
-          </div>
-
           <div className="flex justify-between items-center">
             <span className="text-[9px] font-black tracking-[0.2em] uppercase opacity-30">Type</span>
             <div className="flex gap-1.5">
@@ -87,7 +69,7 @@ export default function PinPopup({ pin, onUpdatePin, onDeletePin }: PinPopupProp
             className="w-full text-[9px] font-bold tracking-[0.2em] py-2 border border-red-900/30 text-red-500 hover:bg-red-500 hover:text-white transition-all uppercase mt-1"
             onClick={() => onDeletePin(pin.id)}
           >
-            Purge Pin
+            Remove
           </button>
         </div>
       </div>
