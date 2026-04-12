@@ -75,6 +75,40 @@ export default function App() {
     }
   };
 
+  const appendFromClipboard = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const incomingData: MapState = JSON.parse(text);
+
+      if (typeof incomingData !== 'object' || incomingData === null) {
+        alert("APPEND FAILED: Invalid data format");
+        return;
+      }
+
+      const newData: MapState = { ...allMapData };
+
+      // 2. Perform the merge logic
+      Object.keys(incomingData).forEach((mapId) => {
+        const existingPins = newData[mapId] || [];
+        const incomingPins = incomingData[mapId] || [];
+
+        // Deduplicate: Only add pins with IDs we don't already have
+        const uniqueIncoming = incomingPins.filter(
+          (inPin) => !existingPins.some((exPin) => exPin.id === inPin.id)
+        );
+
+        newData[mapId] = [...existingPins, ...uniqueIncoming];
+      });
+
+      // 3. Pass the final object directly to the setter
+      setAllMapData(newData);
+      alert("PINS APPENDED");
+    } catch (err) {
+      alert("APPEND ERROR: Check console");
+      console.error(err);
+    }
+  };
+
   return (
     <div className="relative h-screen w-screen bg-black select-none">
       <Sidebar 
@@ -84,6 +118,7 @@ export default function App() {
         onToggleColor={cycleColorState}
         onExport={exportToClipboard}
         onImport={importFromClipboard}
+        onAppend={appendFromClipboard}
       />
       
       <GameMap 

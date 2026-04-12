@@ -6,10 +6,11 @@ import { MAP_LIST } from '../constants/maps';
 interface SidebarProps {
   activeMap: string;
   setActiveMap: (id: string) => void;
-  colorStates: Record<PinColor, number>; // Updated from Set
+  colorStates: Record<PinColor, number>;
   onToggleColor: (color: PinColor) => void;
   onExport: () => void;
   onImport: () => void;
+  onAppend: () => void; // New prop for merging data
 }
 
 const COLORS: PinColor[] = ['red', 'orange', 'yellow', 'green', 'blue', 'violet'];
@@ -20,7 +21,8 @@ export default function Sidebar({
   colorStates,
   onToggleColor,
   onExport,
-  onImport
+  onImport,
+  onAppend
 }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -86,7 +88,6 @@ export default function Sidebar({
                   }}
                   title={state === 0 ? 'Hidden' : state === 1 ? 'Pin Only' : 'Pin + Label'}
                 >
-                  {/* State 1: Inner Dot for "Pin Only" */}
                   {state === 1 && (
                     <div 
                       className="w-2.5 h-2.5 rounded-full" 
@@ -94,7 +95,6 @@ export default function Sidebar({
                     />
                   )}
 
-                  {/* High-visibility ring for active states */}
                   {state > 0 && (
                     <div className="absolute -inset-1 border border-white/5 rounded-full pointer-events-none" />
                   )}
@@ -110,14 +110,25 @@ export default function Sidebar({
             onClick={onExport} 
             className="w-full text-[9px] font-bold tracking-[0.2em] border border-[#1A1A1A] py-3 hover:bg-blue-900/20 hover:border-blue-500/50 transition-all uppercase"
           >
-            Export to Clipboard
+            Export Archive
           </button>
-          <button 
-            onClick={onImport} 
-            className="w-full text-[9px] font-bold tracking-[0.2em] border border-[#1A1A1A] py-3 hover:bg-green-900/20 hover:border-green-500/50 transition-all uppercase opacity-40 hover:opacity-100"
-          >
-            Load from clipboard
-          </button>
+          
+          <div className="flex gap-2">
+            <button 
+              onClick={onImport} 
+              className="flex-1 text-[9px] font-bold tracking-[0.1em] border border-[#1A1A1A] py-3 hover:bg-[#E0E0E0] hover:text-black transition-all uppercase opacity-40 hover:opacity-100"
+              title="Overwrite current data"
+            >
+              Overwrite
+            </button>
+            <button 
+              onClick={onAppend} 
+              className="flex-1 text-[9px] font-bold tracking-[0.1em] border border-[#1A1A1A] py-3 hover:bg-[#E0E0E0] hover:text-black transition-all uppercase opacity-40 hover:opacity-100"
+              title="Merge from clipboard"
+            >
+              Append
+            </button>
+          </div>
         </footer>
       </div>
 
