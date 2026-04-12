@@ -3,8 +3,25 @@ import { useState, useMemo } from 'react';
 import GameMap from './components/GameMap';
 import Sidebar from './components/SideBar'; 
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { type Pin, type PinColor, type MapState } from './types';
+import { type Pin, type PinColor, type MapState, type MapExport } from './types';
 import { LatLng } from 'leaflet';
+
+
+const encodeData = (data: MapExport): string => {
+  const json = JSON.stringify(data);
+  // btoa alone fails on non-ASCII; this ensures it's safe for all characters
+  return btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (_, p1) => 
+    String.fromCharCode(parseInt(p1, 16))
+  ));
+};
+
+const decodeData = (base64: string): MapExport => {
+  const json = decodeURIComponent(Array.prototype.map.call(atob(base64), (c) => {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+  return JSON.parse(json);
+};
+
 
 export default function App() {
   const [allMapData, setAllMapData] = useLocalStorage<MapState>("game_map_data_v1", {});
@@ -49,27 +66,61 @@ export default function App() {
   };
 
   const exportToClipboard = () => {
-    navigator.clipboard.writeText(JSON.stringify(allMapData))
-      .then(() => alert("ARCHIVE COPIED"))
-      .catch(err => console.error(err));
+    const exportData: MapExport = {};
+
+    Object.keys(allMapData).forEach((mapId) => {
+      exportData[mapId] = allMapData[mapId].map(pin => ({
+        p: pin.pos,
+        c: pin.color,
+        l: pin.label,
+        n: pin.notes
+      }));
+    });
+
+    try {
+      const encoded = encodeData(exportData);
+      navigator.clipboard.writeText(encoded)
+        .then(() => alert("data copied to clipboard"))
+        .catch(err => console.error(err));
+    } catch (err) {
+      alert("PACKAGING FAILED");
+    }
   };
 
   const importFromClipboard = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      const parsed = JSON.parse(text);
-      if (typeof parsed === 'object' && parsed !== null) {
-        setAllMapData(parsed);
+      const incomingData = decodeData(text.trim());
+
+      if (typeof incomingData !== 'object' || incomingData === null) {
+        throw new Error("Invalid Format");
       }
+
+      const rehydratedData: MapState = {};
+
+      Object.keys(incomingData).forEach((mapId) => {
+        rehydratedData[mapId] = incomingData[mapId].map(exp => ({
+          id: crypto.randomUUID(),
+          pos: exp.p,
+          color: exp.c,
+          label: exp.l,
+          notes: exp.n,
+          isVisible: true,
+          showLabel: false
+        }));
+      });
+
+      setAllMapData(rehydratedData);
+      alert("data overwritten");
     } catch (err) {
-      alert("LINK FAILED: INVALID DATA");
+      alert("DECODING FAILED: invalid data");
     }
   };
 
   const appendFromClipboard = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      const incomingData: MapState = JSON.parse(text);
+      const incomingData = decodeData(text.trim());
 
       if (typeof incomingData !== 'object' || incomingData === null) {
         alert("APPEND FAILED: Invalid data format");
@@ -80,18 +131,30 @@ export default function App() {
 
       Object.keys(incomingData).forEach((mapId) => {
         const existingPins = newData[mapId] || [];
-        const incomingPins = incomingData[mapId] || [];
-        const uniqueIncoming = incomingPins.filter(
-          (inPin) => !existingPins.some((exPin) => exPin.id === inPin.id)
-        );
+        
+        const uniqueIncoming: Pin[] = incomingData[mapId]
+          .map(exp => ({
+            id: crypto.randomUUID(),
+            pos: exp.p,
+            color: exp.c,
+            label: exp.l,
+            notes: exp.n,
+            isVisible: true,
+            showLabel: false
+          }))
+          .filter(inPin => 
+            !existingPins.some(exPin => 
+              exPin.pos[0] === inPin.pos[0] && exPin.pos[1] === inPin.pos[1]
+            )
+          );
 
         newData[mapId] = [...existingPins, ...uniqueIncoming];
       });
 
       setAllMapData(newData);
-      alert("PINS APPENDED");
+      alert("data appended");
     } catch (err) {
-      alert("APPEND ERROR: Check console");
+      alert("APPEND ERROR: check console");
       console.error(err);
     }
   };

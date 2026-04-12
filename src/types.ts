@@ -10,6 +10,15 @@ export interface Pin {
   showLabel: boolean;
 }
 
+export interface PinExport {
+  p: [number, number]; // shorthand for pos
+  c: PinColor;         // shorthand for color
+  l: string;           // shorthand for label
+  n: string;           // shorthand for notes
+}
+
+export type MapExport = Record<string, PinExport[]>;
+
 export interface MapState {
   [mapId: string]: Pin[];
 }

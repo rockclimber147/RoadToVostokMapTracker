@@ -104,7 +104,7 @@ export default function Sidebar({
             onClick={onExport} 
             className="w-full text-[9px] font-bold tracking-[0.2em] border border-[#1A1A1A] py-3 hover:bg-blue-900/20 hover:border-blue-500/50 transition-all uppercase"
           >
-            Export Archive
+            Copy to Clipboard
           </button>
           
           <div className="flex gap-2">
