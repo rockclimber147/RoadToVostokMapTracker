@@ -6,7 +6,7 @@ import { MAP_LIST } from '../constants/maps';
 interface SidebarProps {
   activeMap: string;
   setActiveMap: (id: string) => void;
-  visibleColors: Set<PinColor>;
+  colorStates: Record<PinColor, number>; // Updated from Set
   onToggleColor: (color: PinColor) => void;
   onExport: () => void;
   onImport: () => void;
@@ -17,7 +17,7 @@ const COLORS: PinColor[] = ['red', 'orange', 'yellow', 'green', 'blue', 'violet'
 export default function Sidebar({
   activeMap,
   setActiveMap,
-  visibleColors,
+  colorStates,
   onToggleColor,
   onExport,
   onImport
@@ -35,13 +35,13 @@ export default function Sidebar({
         
         {/* Minimalist Header */}
         <header className="space-y-1">
-          <h1 className="text-[10px] font-black tracking-[0.3em] uppercase opacity-40">System.Link</h1>
+          <h1 className="text-[10px] font-black tracking-[0.3em] uppercase opacity-40">Road to Vostok</h1>
           <div className="h-[1px] w-full bg-gradient-to-r from-[#1A1A1A] to-transparent" />
         </header>
 
-        {/* Tactical Map Selection (Multi-select style) */}
+        {/* Tactical Map Selection */}
         <section className="space-y-3">
-            <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-30">Sector Selection</h2>
+            <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-30">Map Selection</h2>
             <div className="flex flex-col border border-[#1A1A1A]">
                 {MAP_LIST.map((map) => {
                 const isActive = activeMap === map.id;
@@ -65,25 +65,40 @@ export default function Sidebar({
             </div>
         </section>
 
-        {/* Filter Buttons */}
+        {/* Tri-State Filter Buttons */}
         <section className="space-y-4">
-          <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-30">Signal Filters</h2>
+          <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-30">Filters</h2>
           <div className="grid grid-cols-3 gap-4 justify-items-center">
             {COLORS.map(color => {
-              const isActive = visibleColors.has(color);
+              const state = colorStates[color];
+              
               return (
                 <button
                   key={color}
                   onClick={() => onToggleColor(color)}
                   className={`
-                    w-8 h-8 rounded-full transition-all duration-300 border border-white/5
-                    ${isActive 
-                      ? 'opacity-100 scale-110 ring-1 ring-white/20 ring-offset-4 ring-offset-[#050505]' 
-                      : 'opacity-10 grayscale scale-90'
-                    }
+                    relative w-8 h-8 rounded-full transition-all duration-300 border border-white/10
+                    flex items-center justify-center
+                    ${state === 0 ? 'opacity-10 grayscale scale-90' : 'opacity-100 scale-110'}
                   `}
-                  style={{ backgroundColor: color }}
-                />
+                  style={{ 
+                    backgroundColor: state === 2 ? color : 'transparent',
+                  }}
+                  title={state === 0 ? 'Hidden' : state === 1 ? 'Pin Only' : 'Pin + Label'}
+                >
+                  {/* State 1: Inner Dot for "Pin Only" */}
+                  {state === 1 && (
+                    <div 
+                      className="w-2.5 h-2.5 rounded-full" 
+                      style={{ backgroundColor: color }} 
+                    />
+                  )}
+
+                  {/* High-visibility ring for active states */}
+                  {state > 0 && (
+                    <div className="absolute -inset-1 border border-white/5 rounded-full pointer-events-none" />
+                  )}
+                </button>
               );
             })}
           </div>
@@ -95,13 +110,13 @@ export default function Sidebar({
             onClick={onExport} 
             className="w-full text-[9px] font-bold tracking-[0.2em] border border-[#1A1A1A] py-3 hover:bg-blue-900/20 hover:border-blue-500/50 transition-all uppercase"
           >
-            Export Archive
+            Export to Clipboard
           </button>
           <button 
             onClick={onImport} 
             className="w-full text-[9px] font-bold tracking-[0.2em] border border-[#1A1A1A] py-3 hover:bg-green-900/20 hover:border-green-500/50 transition-all uppercase opacity-40 hover:opacity-100"
           >
-            Load Uplink
+            Load from clipboard
           </button>
         </footer>
       </div>

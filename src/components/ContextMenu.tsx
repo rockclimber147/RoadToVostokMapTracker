@@ -16,9 +16,6 @@ export default function ContextMenu({ x, y, onSelectColor, onClose }: ContextMen
       style={{ top: y, left: x }}
       onMouseLeave={onClose}
     >
-      {/* Minimalist Grid: No text, just colors. 
-        The grid layout matches the Sidebar visual language.
-      */}
       <div className="grid grid-cols-3 gap-3">
         {COLORS.map((color) => (
           <button

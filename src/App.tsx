@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import GameMap from './components/GameMap';
-import Sidebar from './components/SideBar';
+import Sidebar from './components/SideBar'; // Fixed casing
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { type Pin, type PinColor, type MapState } from './types';
 import { LatLng } from 'leaflet';
@@ -8,9 +8,18 @@ import { LatLng } from 'leaflet';
 export default function App() {
   const [allMapData, setAllMapData] = useLocalStorage<MapState>("game_map_data_v1", {});
   const [activeMap, setActiveMap] = useState("map1");
-  const [visibleColors, setVisibleColors] = useState<Set<PinColor>>(
-    new Set(['red', 'yellow', 'orange', 'green', 'blue', 'violet'])
-  );
+  
+  // Requirement: Tri-state visibility (0: hidden, 1: pin only, 2: pin + label)
+  const [colorStates, setColorStates] = useState<Record<PinColor, number>>({
+    red: 2, yellow: 2, orange: 2, green: 2, blue: 2, violet: 2
+  });
+
+  const cycleColorState = (color: PinColor) => {
+    setColorStates(prev => ({
+      ...prev,
+      [color]: (prev[color] + 1) % 3
+    }));
+  };
 
   const currentPins = useMemo(() => allMapData[activeMap] || [], [allMapData, activeMap]);
 
@@ -22,10 +31,11 @@ export default function App() {
     const newPin: Pin = {
       id: crypto.randomUUID(),
       pos: [latlng.lat, latlng.lng],
-      color: color, // Use the passed color
+      color: color,
       label: '',
       notes: '',
-      isVisible: true
+      isVisible: true,
+      showLabel: true // Default newly placed pins to show labels
     };
     savePins([...currentPins, newPin]);
   };
@@ -40,7 +50,7 @@ export default function App() {
 
   const exportToClipboard = () => {
     navigator.clipboard.writeText(JSON.stringify(allMapData))
-      .then(() => alert("Data copied!"))
+      .then(() => alert("Archive Copied"))
       .catch(err => console.error(err));
   };
 
@@ -52,14 +62,8 @@ export default function App() {
         setAllMapData(parsed);
       }
     } catch (err) {
-      alert("Invalid JSON data");
+      alert("Link Failed: Invalid Data");
     }
-  };
-
-  const toggleColorVisibility = (color: PinColor) => {
-    const next = new Set(visibleColors);
-    next.has(color) ? next.delete(color) : next.add(color);
-    setVisibleColors(next);
   };
 
   return (
@@ -67,8 +71,8 @@ export default function App() {
       <Sidebar 
         activeMap={activeMap}
         setActiveMap={setActiveMap}
-        visibleColors={visibleColors}
-        onToggleColor={toggleColorVisibility}
+        colorStates={colorStates} // Passing the Record instead of the Set
+        onToggleColor={cycleColorState} // Passing the Cycle function
         onExport={exportToClipboard}
         onImport={importFromClipboard}
       />
@@ -79,7 +83,7 @@ export default function App() {
         onAddPin={handleAddPin}
         onUpdatePin={handleUpdatePin}
         onDeletePin={handleDeletePin}
-        visibleColors={visibleColors}
+        colorStates={colorStates} // Passing the Record to the map
       />
     </div>
   );

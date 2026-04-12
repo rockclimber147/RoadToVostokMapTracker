@@ -7,6 +7,7 @@ export interface Pin {
   label: string;
   notes: string;
   isVisible: boolean;
+  showLabel: boolean;
 }
 
 export interface MapState {
