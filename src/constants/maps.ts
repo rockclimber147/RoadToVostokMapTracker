@@ -18,43 +18,43 @@ export const GAME_MAPS: Record<string, MapDefinition> = {
     id: 'map2', 
     label: 'HIGHWAY', 
     url: '/maps/highway.jpg', 
-    width: 3840, 
-    height: 2160 
+    width: 2000, 
+    height: 2000 
   },
   map3: { 
     id: 'map3', 
     label: 'SCHOOL', 
     url: '/maps/school.jpg', 
-    width: 1920, 
-    height: 1080 
+    width: 2000, 
+    height: 2000 
   },
   map4: { 
     id: 'map4', 
     label: 'OUTPOST', 
     url: '/maps/outpost.jpg', 
-    width: 2500, 
-    height: 1500 
+    width: 2000, 
+    height: 2000 
   },
   map5: { 
     id: 'map5', 
     label: 'MINEFIELD', 
     url: '/maps/minefield.jpg', 
     width: 2000, 
-    height: 3000 
+    height: 2000 
   },
   map6: { 
     id: 'map6', 
     label: 'APARTMENTS', 
     url: '/maps/apartments.jpg', 
-    width: 1080, 
-    height: 1920 
+    width: 2000, 
+    height: 2000 
   },
   map7: { 
     id: 'map7', 
     label: 'TERMINAL', 
     url: '/maps/terminal.jpg', 
-    width: 4000, 
-    height: 4000 
+    width: 2000, 
+    height: 2000 
   },
 };
 
