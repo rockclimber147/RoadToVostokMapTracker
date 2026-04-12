@@ -1,4 +1,3 @@
-// src/components/GameMap.tsx
 import { useState } from 'react';
 import { MapContainer, ImageOverlay, Marker, Tooltip, useMapEvents } from 'react-leaflet';
 import L, { LatLng } from 'leaflet';

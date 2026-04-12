@@ -1,4 +1,3 @@
-// src/components/Sidebar.tsx
 import { useState } from 'react';
 import { type PinColor } from '../types';
 import { MAP_LIST } from '../constants/maps';
@@ -10,7 +9,7 @@ interface SidebarProps {
   onToggleColor: (color: PinColor) => void;
   onExport: () => void;
   onImport: () => void;
-  onAppend: () => void; // New prop for merging data
+  onAppend: () => void;
 }
 
 const COLORS: PinColor[] = ['red', 'orange', 'yellow', 'green', 'blue', 'violet'];
@@ -32,16 +31,13 @@ export default function Sidebar({
         isOpen ? 'translate-x-0' : 'translate-x-64'
       }`}
     >
-      {/* Sidebar Content */}
       <div className="w-64 bg-[#050505]/95 backdrop-blur-xl text-[#E0E0E0] p-6 flex flex-col gap-8 border-l border-[#1A1A1A] shadow-2xl overflow-y-auto">
         
-        {/* Minimalist Header */}
         <header className="space-y-1">
-          <h1 className="text-[10px] font-black tracking-[0.3em] uppercase opacity-40">Road to Vostok</h1>
+          <h1 className="text-[10px] font-black tracking-[0.3em] uppercase opacity-40">Road to Vostok Mapping Tool</h1>
           <div className="h-[1px] w-full bg-gradient-to-r from-[#1A1A1A] to-transparent" />
         </header>
 
-        {/* Tactical Map Selection */}
         <section className="space-y-3">
             <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-30">Map Selection</h2>
             <div className="flex flex-col border border-[#1A1A1A]">
@@ -67,7 +63,6 @@ export default function Sidebar({
             </div>
         </section>
 
-        {/* Tri-State Filter Buttons */}
         <section className="space-y-4">
           <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-30">Filters</h2>
           <div className="grid grid-cols-3 gap-4 justify-items-center">
@@ -104,7 +99,6 @@ export default function Sidebar({
           </div>
         </section>
 
-        {/* Action Buttons */}
         <footer className="mt-auto space-y-2">
           <button 
             onClick={onExport} 
@@ -132,7 +126,6 @@ export default function Sidebar({
         </footer>
       </div>
 
-      {/* Toggle Tab */}
       <div className="self-center">
         <button 
           onClick={() => setIsOpen(!isOpen)}

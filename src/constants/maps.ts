@@ -6,6 +6,7 @@ export interface MapDefinition {
   height: number;
 }
 
+// I screen captured the map images, the width and heights are close enough to square
 export const GAME_MAPS: Record<string, MapDefinition> = {
   map1: { 
     id: 'map1', 
