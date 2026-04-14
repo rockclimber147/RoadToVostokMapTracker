@@ -39,7 +39,8 @@ export const packageForExport = (allMapData: MapState): MapExport => {
       pa: (data.paths || []).map(path => ({
         pts: path.points,
         c: path.color,
-        l: path.label
+        l: path.label,
+        v: path.isVisible
       }))
     };
   });
@@ -73,8 +74,9 @@ export const rehydrateData = (incoming: any): MapState => {
       paths: (legacyPaths || []).map((exp: any) => ({
         id: crypto.randomUUID(),
         points: exp.pts,
-        color: exp.c,
-        label: exp.l
+        color: exp.c || 'red',
+        label: exp.l || 'ROUTE',
+        isVisible: exp.v !== false
       }))
     };
   });

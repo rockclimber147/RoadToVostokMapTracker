@@ -54,6 +54,9 @@ export default function App() {
         onAppend={appendFromClipboard}
         isPathingMode={pathing.isPathingMode}
         onTogglePathMode={pathing.togglePathingMode}
+        paths={mapData.paths}
+        onUpdatePath={pathing.handleUpdatePath}
+        onDeletePath={pathing.handleDeletePath}
       />
       
       <GameMap 
@@ -74,6 +77,7 @@ export default function App() {
         onAddPath={pathing.handleAddPathNode}
         onMovePathNode={pathing.handleMovePathNode}
         onDeletePathNode={pathing.handleDeletePathNode}
+    
       />
     </div>
   );

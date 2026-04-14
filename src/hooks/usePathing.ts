@@ -29,7 +29,13 @@ export function usePathing({ mapData, saveMapData }: UsePathingProps) {
 
     if (!activePathId) {
       const newId = crypto.randomUUID();
-      const newPath: Path = { id: newId, points: [pos], color: 'red', label: 'NEW PATH' };
+      const newPath: Path = { 
+        id: newId, 
+        points: [pos], 
+        color: 'red', 
+        label: `ROUTE-${currentPaths.length + 1}`, // Auto-incrementing name
+        isVisible: true 
+    };
       saveMapData({ paths: [...currentPaths, newPath] });
       setActivePathId(newId);
       setSelectedPathNode({ pathId: newId, index: 0 }); 
@@ -61,6 +67,13 @@ export function usePathing({ mapData, saveMapData }: UsePathingProps) {
     saveMapData({ paths: updatedPaths });
   };
 
+  const handleUpdatePath = (pathId: string, updates: Partial<Path>) => {
+    const updatedPaths = mapData.paths.map(p => 
+      p.id === pathId ? { ...p, ...updates } : p
+    );
+    saveMapData({ paths: updatedPaths });
+  };
+
   const handleDeletePathNode = (pathId: string, index: number) => {
     const updatedPaths = mapData.paths.map(p => {
       if (p.id !== pathId) return p;
@@ -73,6 +86,17 @@ export function usePathing({ mapData, saveMapData }: UsePathingProps) {
     if (!updatedPaths.find(p => p.id === activePathId)) setActivePathId(null);
   };
 
+  // --- NEW: Purge entire path ---
+  const handleDeletePath = (pathId: string) => {
+    saveMapData({ paths: mapData.paths.filter(p => p.id !== pathId) });
+    
+    // Safety check: if you delete the path you are currently drawing
+    if (activePathId === pathId) {
+      setActivePathId(null);
+      setSelectedPathNode(null);
+    }
+  };
+
   return {
     isPathingMode,
     selectedPathNode,
@@ -80,6 +104,8 @@ export function usePathing({ mapData, saveMapData }: UsePathingProps) {
     togglePathingMode,
     handleAddPathNode,
     handleMovePathNode,
-    handleDeletePathNode
+    handleDeletePathNode,
+    handleUpdatePath,
+    handleDeletePath
   };
 }

@@ -15,6 +15,7 @@ export interface Path {
   points: [number, number][];
   color: PinColor;
   label: string;
+  isVisible: boolean;
 }
 
 // Serialization Shorthands
@@ -29,6 +30,7 @@ export interface PathExport {
   pts: [number, number][]; // points
   c: PinColor;             // color
   l: string;               // label
+  v?: boolean;
 }
 
 export interface MapExport {

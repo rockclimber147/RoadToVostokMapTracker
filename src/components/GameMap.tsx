@@ -11,18 +11,18 @@ import 'leaflet/dist/leaflet.css';
 
 interface Props {
   pins?: Pin[];
-  paths?: Path[]; // Added optional safety
+  paths?: Path[];
   activeMapId: string;
   isPathingMode: boolean;
-  onAddPin: (latlng: LatLng, color: PinColor, id: string) => void;
-  onUpdatePin: (id: string, updates: Partial<Pin>) => void;
-  onDeletePin: (id: string) => void;
-  colorStates: Record<PinColor, number>;
-  onAddPath: (latlng: LatLng) => void;
   selectedPathNode?: { pathId: string; index: number } | null;
+  onAddPin: (latlng: LatLng, color: PinColor, id: string) => void;
+  onAddPath: (latlng: LatLng) => void;
   onSelectPathNode: (pathId: string, index: number) => void;
   onMovePathNode: (pathId: string, index: number, latlng: LatLng) => void;
   onDeletePathNode: (pathId: string, index: number) => void;
+  onUpdatePin: (id: string, updates: Partial<Pin>) => void;
+  onDeletePin: (id: string) => void;
+  colorStates: Record<PinColor, number>;
 }
 
 export default function GameMap({ 
@@ -30,15 +30,15 @@ export default function GameMap({
   paths = [],
   activeMapId, 
   isPathingMode,
+  selectedPathNode,
   onAddPin, 
   onAddPath,
-  onUpdatePin, 
-  onDeletePin,
-  colorStates,
-  selectedPathNode,
   onSelectPathNode,
   onMovePathNode,
-  onDeletePathNode
+  onDeletePathNode,
+  onUpdatePin, 
+  onDeletePin,
+  colorStates 
 }: Props) {
   const mapData = GAME_MAPS[activeMapId] || GAME_MAPS['map1'];
   const bounds: L.LatLngBoundsExpression = [[0, 0], [mapData.height, mapData.width]];
@@ -61,9 +61,7 @@ export default function GameMap({
   function MapEvents() {
     useMapEvents({
       contextmenu: (e) => {
-        // Block the right-click menu if we are actively mapping a path
         if (isPathingMode) return; 
-        
         setMenu({
           latlng: e.latlng,
           x: e.originalEvent.clientX,
@@ -72,7 +70,6 @@ export default function GameMap({
       },
       click: (e) => { 
         if (isPathingMode) {
-          // Left click adds a waypoint to the active route
           onAddPath(e.latlng);
         } else if (menu) {
           setMenu(null);
@@ -82,6 +79,10 @@ export default function GameMap({
     });
     return null;
   }
+
+  const activePaths = paths.filter(path => 
+    path.isVisible && colorStates[path.color] > 0
+  );
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
@@ -100,66 +101,84 @@ export default function GameMap({
         <MapEvents />
 
         {/* 1. RENDER PATH LINES */}
-        {paths.map((path) => (
+        {activePaths.map((path) => (
           <Polyline 
-            key={`line-${path.id}`}
+            key={`line-${path.id}-${path.color}`}
             positions={path.points} 
             color={path.color} 
             weight={3}
-            dashArray="8, 8" // Tactical dashed appearance
+            dashArray="8, 8"
             opacity={0.8}
-            interactive={false} // Prevents line from intercepting clicks
+            interactive={false}
           />
         ))}
 
-        {/* 2. RENDER PATH WAYPOINTS */}
-        {paths.map((path) => 
-          path.points.map((pos, idx) => {
-            // Check if this specific node is currently selected
+        {/* 2. RENDER PATH WAYPOINTS & START LABEL */}
+        {activePaths.map((path) => {
+          const isFullState = colorStates[path.color] === 2;
+
+          return path.points.map((pos, idx) => {
+            // OPTIMIZATION: If not pathing, ONLY render the first node (to hold the label)
+            if (!isPathingMode && idx !== 0) return null;
+
             const isSelected = selectedPathNode?.pathId === path.id && selectedPathNode?.index === idx;
+
+            // When pathing is OFF, the HTML is empty to hide the pip
+            const pipHtml = isPathingMode 
+              ? `<div class="w-3 h-3 rounded-full transition-all ${
+                  isSelected ? 'border-[3px] border-white scale-125 shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'border border-black/80 shadow-sm'
+                }" style="background-color: ${path.color}"></div>`
+              : `<div></div>`;
 
             const nodeIcon = L.divIcon({
               className: 'bg-transparent outline-none',
-              // Highlight the selected node with a thicker white border and slight scale increase
-              html: `<div class="w-3 h-3 rounded-full transition-all ${
-                isSelected ? 'border-[3px] border-white scale-125 shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'border border-black/80 shadow-sm'
-              }" style="background-color: ${path.color}"></div>`,
-              iconSize: [12, 12],
-              iconAnchor: [6, 6]
+              html: pipHtml,
+              // Collapse the anchor to 0x0 when not pathing so the label sits perfectly on the line
+              iconSize: isPathingMode ? [12, 12] : [0, 0],
+              iconAnchor: isPathingMode ? [6, 6] : [0, 0]
             });
 
             return (
               <Marker 
-                key={`node-${path.id}-${idx}`}
+                key={`node-${path.id}-${idx}-${path.color}-${isPathingMode}`}
                 position={pos}
                 icon={nodeIcon}
-                interactive={isPathingMode} // Only clickable/draggable while Pathing Mode is active
+                interactive={isPathingMode}
                 draggable={isPathingMode}
                 eventHandlers={{
-                  click: () => {
-                    // Left click to select for insertion
-                    if (isPathingMode) onSelectPathNode(path.id, idx);
-                  },
-                  contextmenu: () => {
-                    // Right click to delete the node
-                    if (isPathingMode) onDeletePathNode(path.id, idx);
-                  },
-                  dragend: (e) => {
-                    // Update the coordinates when you finish dragging
-                    if (isPathingMode) onMovePathNode(path.id, idx, e.target.getLatLng());
-                  }
+                  click: () => { if (isPathingMode) onSelectPathNode(path.id, idx); },
+                  contextmenu: () => { if (isPathingMode) onDeletePathNode(path.id, idx); },
+                  dragend: (e) => { if (isPathingMode) onMovePathNode(path.id, idx, e.target.getLatLng()); }
                 }}
-              />
+              >
+                {/* START LABEL */}
+                {idx === 0 && path.label && (
+                  <Tooltip 
+                    key={`pathtooltip-${path.id}-${isFullState}`}
+                    direction="top" 
+                    // Adjust offset dynamically based on whether the pip is taking up space
+                    offset={isPathingMode ? [0, -10] : [0, 0]} 
+                    opacity={1}
+                    permanent={isFullState} 
+                    className="custom-tooltip"
+                  >
+                    <div className="px-1 py-0.5">
+                      <div className="text-[10px] font-black tracking-[0.15em] uppercase text-[#E0E0E0]" style={{ color: path.color }}>
+                        {path.label}
+                      </div>
+                    </div>
+                  </Tooltip>
+                )}
+              </Marker>
             );
-          })
-        )}
+          });
+        })}
         
         {/* 3. RENDER PINS */}
         {pins
           .filter(pin => colorStates[pin.color] > 0)
           .map((pin) => {
-            const globalState = colorStates[pin.color];
-            const isFullState = globalState === 2;
+            const isFullState = colorStates[pin.color] === 2;
 
             return (
               <Marker 
@@ -204,7 +223,6 @@ export default function GameMap({
         })}
       </MapContainer>
 
-      {/* Deploy Menu (Disabled in Pathing Mode automatically via MapEvents) */}
       {menu && (
         <ContextMenu 
           x={menu.x} 
