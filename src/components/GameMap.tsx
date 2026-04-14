@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { MapContainer, ImageOverlay, Marker, Tooltip, useMapEvents } from 'react-leaflet';
 import L, { LatLng } from 'leaflet';
-import { type Pin, type PinColor } from '../types';
+import { type Pin, type PinColor, type Path } from '../types';
 import { GAME_MAPS } from '../constants/maps';
 import PinPopup from './PinPopup';
 import ContextMenu from './ContextMenu';
@@ -10,6 +10,7 @@ import 'leaflet/dist/leaflet.css';
 
 interface Props {
   pins: Pin[];
+  paths: Path[];
   activeMapId: string;
   onAddPin: (latlng: LatLng, color: PinColor, id: string) => void; // Updated signature
   onUpdatePin: (id: string, updates: Partial<Pin>) => void;

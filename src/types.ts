@@ -1,7 +1,7 @@
 export type PinColor = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'violet';
 
 export interface Pin {
-  id: string; // Use crypto.randomUUID()
+  id: string;
   pos: [number, number];
   color: PinColor;
   label: string;
@@ -10,15 +10,39 @@ export interface Pin {
   showLabel: boolean;
 }
 
-export interface PinExport {
-  p: [number, number]; // shorthand for pos
-  c: PinColor;         // shorthand for color
-  l: string;           // shorthand for label
-  n: string;           // shorthand for notes
+export interface Path {
+  id: string;
+  points: [number, number][];
+  color: PinColor;
+  label: string;
 }
 
-export type MapExport = Record<string, PinExport[]>;
+// Serialization Shorthands
+export interface PinExport {
+  p: [number, number]; // pos
+  c: PinColor;        // color
+  l: string;          // label
+  n: string;          // notes
+}
+
+export interface PathExport {
+  pts: [number, number][]; // points
+  c: PinColor;             // color
+  l: string;               // label
+}
+
+export interface MapExport {
+  [mapId: string]: {
+    pi: PinExport[]; // pins
+    pa: PathExport[]; // paths
+  };
+}
+
+export interface MapData {
+  pins: Pin[];
+  paths: Path[];
+}
 
 export interface MapState {
-  [mapId: string]: Pin[];
+  [mapId: string]: MapData;
 }
