@@ -1,5 +1,6 @@
+// src/components/GameMap.tsx
 import { useState } from 'react';
-import { MapContainer, ImageOverlay, Marker, Tooltip, useMapEvents } from 'react-leaflet';
+import { MapContainer, ImageOverlay, Marker, Tooltip, Polyline, useMapEvents } from 'react-leaflet';
 import L, { LatLng } from 'leaflet';
 import { type Pin, type PinColor, type Path } from '../types';
 import { GAME_MAPS } from '../constants/maps';
@@ -9,22 +10,35 @@ import { createColoredIcon } from '../utils/icons';
 import 'leaflet/dist/leaflet.css';
 
 interface Props {
-  pins: Pin[];
-  paths: Path[];
+  pins?: Pin[];
+  paths?: Path[]; // Added optional safety
   activeMapId: string;
-  onAddPin: (latlng: LatLng, color: PinColor, id: string) => void; // Updated signature
+  isPathingMode: boolean;
+  onAddPin: (latlng: LatLng, color: PinColor, id: string) => void;
   onUpdatePin: (id: string, updates: Partial<Pin>) => void;
   onDeletePin: (id: string) => void;
   colorStates: Record<PinColor, number>;
+  onAddPath: (latlng: LatLng) => void;
+  selectedPathNode?: { pathId: string; index: number } | null;
+  onSelectPathNode: (pathId: string, index: number) => void;
+  onMovePathNode: (pathId: string, index: number, latlng: LatLng) => void;
+  onDeletePathNode: (pathId: string, index: number) => void;
 }
 
 export default function GameMap({ 
-  pins, 
+  pins = [], 
+  paths = [],
   activeMapId, 
+  isPathingMode,
   onAddPin, 
+  onAddPath,
   onUpdatePin, 
   onDeletePin,
-  colorStates 
+  colorStates,
+  selectedPathNode,
+  onSelectPathNode,
+  onMovePathNode,
+  onDeletePathNode
 }: Props) {
   const mapData = GAME_MAPS[activeMapId] || GAME_MAPS['map1'];
   const bounds: L.LatLngBoundsExpression = [[0, 0], [mapData.height, mapData.width]];
@@ -35,8 +49,6 @@ export default function GameMap({
   ];
 
   const [menu, setMenu] = useState<{ latlng: LatLng, x: number, y: number } | null>(null);
-  
-  // Track the ID of the pin we just added to trigger the popup
   const [newestPinId, setNewestPinId] = useState<string | null>(null);
 
   const handleDeployPin = (latlng: LatLng, color: PinColor) => {
@@ -49,13 +61,23 @@ export default function GameMap({
   function MapEvents() {
     useMapEvents({
       contextmenu: (e) => {
+        // Block the right-click menu if we are actively mapping a path
+        if (isPathingMode) return; 
+        
         setMenu({
           latlng: e.latlng,
           x: e.originalEvent.clientX,
           y: e.originalEvent.clientY
         });
       },
-      click: () => { if (menu) setMenu(null); },
+      click: (e) => { 
+        if (isPathingMode) {
+          // Left click adds a waypoint to the active route
+          onAddPath(e.latlng);
+        } else if (menu) {
+          setMenu(null);
+        }
+      },
       movestart: () => { if (menu) setMenu(null); },
     });
     return null;
@@ -76,15 +98,71 @@ export default function GameMap({
       >
         <ImageOverlay url={mapData.url} bounds={bounds} />
         <MapEvents />
+
+        {/* 1. RENDER PATH LINES */}
+        {paths.map((path) => (
+          <Polyline 
+            key={`line-${path.id}`}
+            positions={path.points} 
+            color={path.color} 
+            weight={3}
+            dashArray="8, 8" // Tactical dashed appearance
+            opacity={0.8}
+            interactive={false} // Prevents line from intercepting clicks
+          />
+        ))}
+
+        {/* 2. RENDER PATH WAYPOINTS */}
+        {paths.map((path) => 
+          path.points.map((pos, idx) => {
+            // Check if this specific node is currently selected
+            const isSelected = selectedPathNode?.pathId === path.id && selectedPathNode?.index === idx;
+
+            const nodeIcon = L.divIcon({
+              className: 'bg-transparent outline-none',
+              // Highlight the selected node with a thicker white border and slight scale increase
+              html: `<div class="w-3 h-3 rounded-full transition-all ${
+                isSelected ? 'border-[3px] border-white scale-125 shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'border border-black/80 shadow-sm'
+              }" style="background-color: ${path.color}"></div>`,
+              iconSize: [12, 12],
+              iconAnchor: [6, 6]
+            });
+
+            return (
+              <Marker 
+                key={`node-${path.id}-${idx}`}
+                position={pos}
+                icon={nodeIcon}
+                interactive={isPathingMode} // Only clickable/draggable while Pathing Mode is active
+                draggable={isPathingMode}
+                eventHandlers={{
+                  click: () => {
+                    // Left click to select for insertion
+                    if (isPathingMode) onSelectPathNode(path.id, idx);
+                  },
+                  contextmenu: () => {
+                    // Right click to delete the node
+                    if (isPathingMode) onDeletePathNode(path.id, idx);
+                  },
+                  dragend: (e) => {
+                    // Update the coordinates when you finish dragging
+                    if (isPathingMode) onMovePathNode(path.id, idx, e.target.getLatLng());
+                  }
+                }}
+              />
+            );
+          })
+        )}
         
+        {/* 3. RENDER PINS */}
         {pins
-        .filter(pin => colorStates[pin.color] > 0)
-        .map((pin) => {
+          .filter(pin => colorStates[pin.color] > 0)
+          .map((pin) => {
             const globalState = colorStates[pin.color];
             const isFullState = globalState === 2;
 
             return (
-            <Marker 
+              <Marker 
                 key={`${pin.id}-${isFullState}`} 
                 position={pin.pos}
                 icon={createColoredIcon(pin.color)}
@@ -96,7 +174,7 @@ export default function GameMap({
                     }
                   }
                 }}
-            >
+              >
                 <Tooltip 
                   key={`tooltip-${pin.id}-${isFullState}`} 
                   direction="top" 
@@ -121,11 +199,12 @@ export default function GameMap({
                   onUpdatePin={onUpdatePin} 
                   onDeletePin={onDeletePin} 
                 />
-            </Marker>
+              </Marker>
             );
         })}
       </MapContainer>
 
+      {/* Deploy Menu (Disabled in Pathing Mode automatically via MapEvents) */}
       {menu && (
         <ContextMenu 
           x={menu.x} 

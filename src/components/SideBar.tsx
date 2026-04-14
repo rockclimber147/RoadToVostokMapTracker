@@ -1,3 +1,4 @@
+// src/components/Sidebar.tsx
 import { useState } from 'react';
 import { type PinColor } from '../types';
 import { MAP_LIST } from '../constants/maps';
@@ -10,6 +11,8 @@ interface SidebarProps {
   onExport: () => void;
   onImport: () => void;
   onAppend: () => void;
+  isPathingMode: boolean;        // NEW: Tracks if pathing is active
+  onTogglePathMode: () => void;  // NEW: Toggles the mode
 }
 
 const COLORS: PinColor[] = ['red', 'orange', 'yellow', 'green', 'blue', 'violet'];
@@ -21,7 +24,9 @@ export default function Sidebar({
   onToggleColor,
   onExport,
   onImport,
-  onAppend
+  onAppend,
+  isPathingMode,
+  onTogglePathMode
 }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -97,6 +102,21 @@ export default function Sidebar({
               );
             })}
           </div>
+        </section>
+
+        {/* NEW: Tools Section for Pathing Mode */}
+        <section className="space-y-3">
+          <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-30">Tools</h2>
+          <button 
+            onClick={onTogglePathMode}
+            className={`w-full py-3 text-[10px] font-bold tracking-[0.2em] border transition-all uppercase ${
+              isPathingMode 
+                ? 'bg-orange-900/40 border-orange-500 text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.15)]' 
+                : 'border-[#1A1A1A] text-[#E0E0E0] opacity-40 hover:opacity-100'
+            }`}
+          >
+            {isPathingMode ? 'End Route Tracking' : 'Start Route Tracking'}
+          </button>
         </section>
 
         <footer className="mt-auto space-y-2">
