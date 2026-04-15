@@ -1,5 +1,5 @@
 // src/utils/serialization.ts
-import { type MapState, type MapExport, type Pin, type Path } from '../types';
+import { type MapState, type MapExport } from '../types';
 
 /**
  * Encodes state to a URL-safe Base64 string
