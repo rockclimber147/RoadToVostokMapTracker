@@ -23,6 +23,12 @@ export function usePathing({ mapData, saveMapData }: UsePathingProps) {
     });
   };
 
+const endPathingMode = () => {
+  setIsPathingMode(false);
+  setActivePathId(null);
+  setSelectedPathNode(null);
+};
+
   const handleAddPathNode = (latlng: LatLng) => {
     const currentPaths = mapData.paths;
     const pos: [number, number] = [latlng.lat, latlng.lng];
@@ -102,6 +108,7 @@ export function usePathing({ mapData, saveMapData }: UsePathingProps) {
     selectedPathNode,
     setSelectedPathNode,
     togglePathingMode,
+    endPathingMode,
     handleAddPathNode,
     handleMovePathNode,
     handleDeletePathNode,

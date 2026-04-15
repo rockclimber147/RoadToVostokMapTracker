@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import GameMap from './components/GameMap';
 import Sidebar from './components/SideBar'; 
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -32,6 +32,12 @@ export default function App() {
   // 3. Extracted Logic Hooks
   const { exportToClipboard, importFromClipboard, appendFromClipboard } = useClipboard(allMapData, setAllMapData);
   const pathing = usePathing({ mapData, saveMapData });
+
+  useEffect(() => {
+    if (pathing.isPathingMode) {
+      pathing.endPathingMode();
+    }
+  }, [activeMap]);
 
   // 4. Pin Logic (Kept here as it's the core mapping function)
   const handleAddPin = (latlng: LatLng, color: PinColor, providedId?: string) => {
