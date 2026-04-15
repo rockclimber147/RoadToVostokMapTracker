@@ -95,6 +95,9 @@ export default function GameMap({
         maxBoundsViscosity={0.5}
         zoomControl={false}
         minZoom={-2}
+        zoomSnap={0.1}
+        zoomDelta={0.5}
+        wheelPxPerZoomLevel={120}
         attributionControl={false}
       >
         <ImageOverlay url={mapData.url} bounds={bounds} />
@@ -107,7 +110,7 @@ export default function GameMap({
             positions={path.points} 
             color={path.color} 
             weight={3}
-            dashArray="8, 8"
+            // dashArray="8, 8"
             opacity={0.8}
             interactive={false}
           />
