@@ -1,13 +1,13 @@
 // src/components/GameMap.tsx
-import MarkerClusterGroup from 'react-leaflet-cluster';
 import { useState } from 'react';
-import { MapContainer, ImageOverlay, Marker, Tooltip, Polyline, useMapEvents } from 'react-leaflet';
+import { MapContainer, ImageOverlay } from 'react-leaflet';
 import L, { LatLng } from 'leaflet';
 import { type Pin, type PinColor, type Path } from '../types';
 import { GAME_MAPS } from '../constants/maps';
-import PinPopup from './PinPopup';
 import ContextMenu from './ContextMenu';
-import { createColoredIcon } from '../utils/icons';
+import MapEventsHandler from './map/MapEventsHandler';
+import PathLayer from './map/PathLayer';
+import PinLayer from './map/PinLayer';
 import 'leaflet/dist/leaflet.css';
 
 interface Props {
@@ -50,76 +50,12 @@ export default function GameMap({
   ];
 
   const [menu, setMenu] = useState<{ latlng: LatLng, x: number, y: number } | null>(null);
-  const [newestPinId, setNewestPinId] = useState<string | null>(null);
 
   const handleDeployPin = (latlng: LatLng, color: PinColor) => {
     const id = crypto.randomUUID();
-    setNewestPinId(id);
     onAddPin(latlng, color, id);
     setMenu(null);
   };
-
-  // --- NEW: Dynamic Cluster Label Scraper ---
-  const createClusterIcon = (cluster: any) => {
-    const children = cluster.getAllChildMarkers();
-
-    // 1. Scrape the custom data we injected into the icon options
-    const visibleLabels = children
-      .map((marker: any) => marker.getIcon()?.options || {})
-      .filter((opts: any) => opts.showLabel); // Only show if global state allows labels
-
-    // 2. Limit to 3 so we don't cover the whole screen, and build the HTML
-    const labelsHtml = visibleLabels.slice(0, 3).map((opts: any) => {
-      return `<div class="text-[9px] font-black tracking-[0.1em] uppercase bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap mb-0.5" style="color: ${opts.pinColor};">
-                ${opts.pinLabel || 'UNIDENTIFIED'}
-              </div>`;
-    }).join('');
-
-    // 3. Add an indicator if there are more labels than we can display
-    const hiddenCount = visibleLabels.length - 3;
-    const extraHtml = hiddenCount > 0 
-      ? `<div class="text-[8px] font-bold text-gray-400 tracking-wider uppercase mb-1">+${hiddenCount} more</div>` 
-      : '';
-
-    return L.divIcon({
-      html: `
-        <div class="relative flex flex-col items-center justify-center">
-          <div class="absolute bottom-full mb-1 flex flex-col items-center pointer-events-none z-50">
-            ${labelsHtml}
-            ${extraHtml}
-          </div>
-          <div class="w-8 h-8 flex items-center justify-center rounded-full bg-[#1A1A1A] border-2 border-[#E0E0E0] text-[#E0E0E0] text-[10px] font-black shadow-[0_0_15px_rgba(0,0,0,0.8)]">
-            ${cluster.getChildCount()}
-          </div>
-        </div>
-      `,
-      className: 'bg-transparent',
-      iconSize: L.point(32, 32, true),
-      iconAnchor: [16, 16], // Critical: Anchor exactly in the center of the 32x32 pip so it aligns with the map coordinates
-    });
-  };
-
-  function MapEvents() {
-    useMapEvents({
-      contextmenu: (e) => {
-        if (isPathingMode) return; 
-        setMenu({
-          latlng: e.latlng,
-          x: e.originalEvent.clientX,
-          y: e.originalEvent.clientY
-        });
-      },
-      click: (e) => { 
-        if (isPathingMode) {
-          onAddPath(e.latlng);
-        } else if (menu) {
-          setMenu(null);
-        }
-      },
-      movestart: () => { if (menu) setMenu(null); },
-    });
-    return null;
-  }
 
   const activePaths = paths.filter(path => 
     path.isVisible && colorStates[path.color] > 0
@@ -143,130 +79,30 @@ export default function GameMap({
         attributionControl={false}
       >
         <ImageOverlay url={mapData.url} bounds={bounds} />
-        <MapEvents />
-
-        {/* 1. RENDER PATH LINES */}
-        {activePaths.map((path) => (
-          <Polyline 
-            key={`line-${path.id}-${path.color}`}
-            positions={path.points} 
-            color={path.color} 
-            weight={3}
-            opacity={0.8}
-            interactive={false}
-          />
-        ))}
-
-        {/* 2. RENDER PATH WAYPOINTS & START LABEL */}
-        {activePaths.map((path) => {
-          const isFullState = colorStates[path.color] === 2;
-
-          return path.points.map((pos, idx) => {
-            if (!isPathingMode && idx !== 0) return null;
-
-            const isSelected = selectedPathNode?.pathId === path.id && selectedPathNode?.index === idx;
-
-            const pipHtml = isPathingMode 
-              ? `<div class="w-3 h-3 rounded-full transition-all ${
-                  isSelected ? 'border-[3px] border-white scale-125 shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'border border-black/80 shadow-sm'
-                }" style="background-color: ${path.color}"></div>`
-              : `<div></div>`;
-
-            const nodeIcon = L.divIcon({
-              className: 'bg-transparent outline-none',
-              html: pipHtml,
-              iconSize: isPathingMode ? [12, 12] : [0, 0],
-              iconAnchor: isPathingMode ? [6, 6] : [0, 0]
-            });
-
-            return (
-              <Marker 
-                key={`node-${path.id}-${idx}-${path.color}-${isPathingMode}`}
-                position={pos}
-                icon={nodeIcon}
-                interactive={isPathingMode}
-                draggable={isPathingMode}
-                eventHandlers={{
-                  click: () => { if (isPathingMode) onSelectPathNode(path.id, idx); },
-                  contextmenu: () => { if (isPathingMode) onDeletePathNode(path.id, idx); },
-                  dragend: (e) => { if (isPathingMode) onMovePathNode(path.id, idx, e.target.getLatLng()); }
-                }}
-              >
-                {idx === 0 && path.label && (
-                  <Tooltip 
-                    key={`pathtooltip-${path.id}-${isFullState}`}
-                    direction="top" 
-                    offset={isPathingMode ? [0, -10] : [0, 0]} 
-                    opacity={1}
-                    permanent={isFullState} 
-                    className="custom-tooltip"
-                  >
-                    <div className="px-1 py-0.5">
-                      <div className="text-[10px] font-black tracking-[0.15em] uppercase text-[#E0E0E0]" style={{ color: path.color }}>
-                        {path.label}
-                      </div>
-                    </div>
-                  </Tooltip>
-                )}
-              </Marker>
-            );
-          });
-        })}
         
-        {/* 3. RENDER PINS */}
-        <MarkerClusterGroup
-          chunkedLoading={true}
-          maxClusterRadius={50}
-          iconCreateFunction={createClusterIcon}
-          showCoverageOnHover={false}
-        >
-          {pins
-            .filter(pin => colorStates[pin.color] > 0)
-            .map((pin) => {
-              const isFullState = colorStates[pin.color] === 2;
+        <MapEventsHandler 
+          isPathingMode={isPathingMode}
+          menu={menu}
+          setMenu={setMenu}
+          onAddPath={onAddPath}
+        />
 
-              // --- NEW: Inject data into the Icon for the Cluster engine to read ---
-              const pinIcon = createColoredIcon(pin.color);
-              Object.assign(pinIcon.options, {
-                pinLabel: pin.label,
-                pinColor: pin.color,
-                showLabel: isFullState
-              });
+        <PathLayer 
+          activePaths={activePaths}
+          isPathingMode={isPathingMode}
+          selectedPathNode={selectedPathNode}
+          colorStates={colorStates}
+          onSelectPathNode={onSelectPathNode}
+          onMovePathNode={onMovePathNode}
+          onDeletePathNode={onDeletePathNode}
+        />
 
-              return (
-                <Marker 
-                  key={`pin-${pin.id}-${isFullState}`} 
-                  position={pin.pos}
-                  icon={pinIcon} // Pass our "data-loaded" icon here
-                >
-                  <Tooltip 
-                    key={`tooltip-${pin.id}-${isFullState}-${Math.random()}`} 
-                    direction="top" 
-                    offset={[0, -20]} 
-                    opacity={1}
-                    permanent={isFullState} 
-                    className="custom-tooltip"
-                  >
-                    <div className="px-1 py-0.5">
-                      <div className="text-[10px] font-black tracking-[0.15em] uppercase text-[#E0E0E0]">
-                        {pin.label || (isFullState ? 'UNIDENTIFIED' : '')}
-                      </div>
-                      {pin.notes && (
-                        <div className="notes-section text-[9px] mt-1 opacity-50 tracking-wide lowercase italic border-t border-white/10 pt-1">
-                          {pin.notes}
-                        </div>
-                      )}
-                    </div>
-                  </Tooltip>
-                  <PinPopup 
-                    pin={pin} 
-                    onUpdatePin={onUpdatePin} 
-                    onDeletePin={onDeletePin} 
-                  />
-                </Marker>
-              );
-          })}
-        </MarkerClusterGroup>
+        <PinLayer 
+          pins={pins}
+          colorStates={colorStates}
+          onUpdatePin={onUpdatePin}
+          onDeletePin={onDeletePin}
+        />
       </MapContainer>
 
       {menu && (
