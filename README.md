@@ -1,73 +1,75 @@
-# React + TypeScript + Vite
+# 🗺️ Road to Vostok Map Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A lightweight, high-performance tactical dashboard for planning runs, tracking loot, and drawing routes in the hardcore survival game **Road to Vostok**. 
 
-Currently, two official plugins are available:
+Built with React and Leaflet, this tool features a "Zero-Database" architecture—all map data is stored securely in your browser's local storage or shared via highly compressed Base64 clipboard strings.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+🔗 **[Live Demo](https://[your-github-username].github.io/RoadToVostokMapTracker/)**
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Features
 
-## Expanding the ESLint configuration
+* **Interactive Tactical Mapping:** High-resolution rendering of Vostok's zones using fractional zooming and custom coordinate reference systems (CRS.Simple).
+* **Route Planning & Layer Management:** Draw multi-node tactical paths. Drag waypoints to adjust routes, and use the Sidebar to rename, recolor, or toggle the visibility of individual routes to declutter your screen.
+* **Smart Spatial Clustering:** Maps gracefully handle hundreds of pins without lagging. Close-proximity pins automatically group into tactical clusters that dynamically update based on your active color filters.
+* **Global Visibility Filters:** Use the tri-state filter system to show full details, show pins only, or completely hide specific color categories.
+* **Permadeath Zone Tracking:** Map selector actively highlights high-risk permadeath zones (like Vostok and the Border Zone) in tactical red.
+* **Squad Data Sharing:** Share your tactical plans instantly. The app packages your pins and routes, applies structural JSON pruning for maximum compression, and generates a URL-safe Base64 string. Squadmates can paste this string to perfectly merge your data with theirs.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ Tech Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+* **Frontend:** React 18, TypeScript
+* **Build Tool:** Vite
+* **Mapping Engine:** Leaflet & React-Leaflet
+* **Styling:** Tailwind CSS
+* **Deployment:** GitHub Pages (`gh-pages`)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🚀 Local Development
+
+To run this project locally on your machine:
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/](https://github.com/)rockclimber147/RoadToVostokMapTracker.git
+   cd RoadToVostokMapTracker
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+   Open your browser and navigate to `http://localhost:5173`.
+
+---
+
+## 📦 Deployment
+
+This project uses a dual-pipeline deployment setup to safely host on GitHub pages via a subdirectory without breaking local routing.
+
+To deploy the latest changes to the live site, simply run:
+```bash
+npm run deploy
 ```
+*This command compiles the React app with the correct Vite base URL and pushes the optimized `dist` folder to the `gh-pages` branch.*
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📝 Usage Guide
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+* **Drop Pins:** Right-click anywhere on the map to open the tactical menu and select a color.
+* **Edit Pins:** Click an existing pin to add detailed notes or change its label.
+* **Draw Routes:** Click `Start Route Tracking` in the sidebar. Left-click on the map to drop route waypoints. Right-click a waypoint to delete it. Drag waypoints to adjust the path.
+* **Export Data:** Click `Copy to Clipboard` to generate a compressed string of your active map.
+* **Import Data:** Click `Overwrite` to replace your local cache with clipboard data, or `Append` to merge a squadmate's pins/routes without losing your own.
+
+---
+
+*Disclaimer: This is a fan-made tool and is not officially affiliated with Road to Vostok.*
