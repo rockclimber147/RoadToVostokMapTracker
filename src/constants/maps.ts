@@ -1,9 +1,11 @@
 export interface MapDefinition {
   id: string;
   label: string;
+  zone: string;
   url: string;
   width: number;
   height: number;
+  isPermaDeath?: boolean;
 }
 
 const basePath = import.meta.env.BASE_URL;
@@ -12,6 +14,7 @@ export const GAME_MAPS: Record<string, MapDefinition> = {
   map1: { 
     id: 'map1', 
     label: 'VILLAGE', 
+    zone: "Area 05",
     url: `${basePath}maps/village.jpg`, 
     width: 2000, 
     height: 2000 
@@ -19,6 +22,7 @@ export const GAME_MAPS: Record<string, MapDefinition> = {
   map2: { 
     id: 'map2', 
     label: 'HIGHWAY', 
+    zone: "Area 05",
     url: `${basePath}maps/highway.jpg`, 
     width: 2000, 
     height: 2000 
@@ -26,6 +30,7 @@ export const GAME_MAPS: Record<string, MapDefinition> = {
   map3: { 
     id: 'map3', 
     label: 'SCHOOL', 
+    zone: "Area 05",
     url: `${basePath}maps/school.jpg`, 
     width: 2000, 
     height: 2000 
@@ -33,6 +38,7 @@ export const GAME_MAPS: Record<string, MapDefinition> = {
   map4: { 
     id: 'map4', 
     label: 'OUTPOST', 
+    zone: "Area 05",
     url: `${basePath}maps/outpost.jpg`, 
     width: 2000, 
     height: 2000 
@@ -40,6 +46,7 @@ export const GAME_MAPS: Record<string, MapDefinition> = {
   map5: { 
     id: 'map5', 
     label: 'MINEFIELD', 
+    zone: "Border Zone",
     url: `${basePath}maps/minefield.jpg`, 
     width: 2000, 
     height: 2000 
@@ -47,13 +54,17 @@ export const GAME_MAPS: Record<string, MapDefinition> = {
   map6: { 
     id: 'map6', 
     label: 'APARTMENTS', 
+    zone: "Vostok",
+    isPermaDeath: true,
     url: `${basePath}maps/apartments.jpg`, 
     width: 2000, 
     height: 2000 
   },
   map7: { 
     id: 'map7', 
-    label: 'TERMINAL', 
+    label: 'TERMINAL',
+    zone: "Vostok", 
+    isPermaDeath: true,
     url: `${basePath}maps/terminal.jpg`, 
     width: 2000, 
     height: 2000 
