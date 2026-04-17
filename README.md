@@ -1,23 +1,23 @@
-# 🗺️ Road to Vostok Map Tracker
+# Road to Vostok Map Tracker
 
-A lightweight, high-performance tactical dashboard for planning runs, tracking loot, and drawing routes in the hardcore survival game **Road to Vostok**. 
+A lightweight, high-performance dashboard for planning runs, tracking loot, and drawing routes in the hardcore survival game **Road to Vostok**. 
 
-Built with React and Leaflet, this tool features a "Zero-Database" architecture—all map data is stored securely in your browser's local storage or shared via highly compressed Base64 clipboard strings.
+Built with React and Leaflet, this tool features a Zero-Database architecture, all map data is stored securely in your browser's local storage or shared via highly compressed Base64 clipboard strings.
 
 🔗 **[Live Demo](https://rockclimber147.github.io/RoadToVostokMapTracker/)**
 
 ---
 
-## ✨ Features
+## Features
 
 * **Interactive Tactical Mapping:** High-resolution rendering of Vostok's zones using fractional zooming and custom coordinate reference systems (CRS.Simple).
-* **Route Planning & Layer Management:** Draw multi-node tactical paths. Drag waypoints to adjust routes, and use the Sidebar to rename, recolor, or toggle the visibility of individual routes to declutter your screen.
-* **Smart Spatial Clustering:** Maps gracefully handle hundreds of pins without lagging. Close-proximity pins automatically group into tactical clusters that dynamically update based on your active color filters.
+* **Route Planning & Layer Management:** Draw multi-node paths. Drag waypoints to adjust routes, and use the Sidebar to rename, recolor, or toggle the visibility of individual routes to declutter your screen.
+* **Smart Spatial Clustering:** Maps gracefully handle hundreds of pins without lagging. Close-proximity pins automatically group into  clusters that dynamically update based on your active color filters.
 * **Global Visibility Filters:** Use the tri-state filter system to show full details, show pins only, or completely hide specific color categories.
-* **Permadeath Zone Tracking:** Map selector actively highlights high-risk permadeath zones (like Vostok and the Border Zone) in tactical red.
-* **Squad Data Sharing:** Share your tactical plans instantly. The app packages your pins and routes, applies structural JSON pruning for maximum compression, and generates a URL-safe Base64 string. Squadmates can paste this string to perfectly merge your data with theirs.
+* **Permadeath Zone Tracking:** Map selector actively highlights high-risk permadeath zones in red.
+* **Squad Data Sharing:** Share your plans instantly. The app packages your pins and routes, applies structural JSON pruning for maximum compression, and generates a URL-safe Base64 string. Squadmates can paste this string to perfectly merge your data with theirs.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 * **Frontend:** React 18, TypeScript
 * **Build Tool:** Vite
@@ -27,7 +27,7 @@ Built with React and Leaflet, this tool features a "Zero-Database" architecture�
 
 ---
 
-## 🚀 Local Development
+## Local Development
 
 To run this project locally on your machine:
 
@@ -50,7 +50,7 @@ To run this project locally on your machine:
 
 ---
 
-## 📦 Deployment
+## Deployment
 
 This project uses a dual-pipeline deployment setup to safely host on GitHub pages via a subdirectory without breaking local routing.
 
@@ -62,7 +62,7 @@ npm run deploy
 
 ---
 
-## 📝 Usage Guide
+## Usage Guide
 
 * **Drop Pins:** Right-click anywhere on the map to open the tactical menu and select a color.
 * **Edit Pins:** Click an existing pin to add detailed notes or change its label.
