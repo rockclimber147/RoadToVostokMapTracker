@@ -4,7 +4,7 @@ A lightweight, high-performance tactical dashboard for planning runs, tracking l
 
 Built with React and Leaflet, this tool features a "Zero-Database" architecture—all map data is stored securely in your browser's local storage or shared via highly compressed Base64 clipboard strings.
 
-🔗 **[Live Demo](https://[your-github-username].github.io/RoadToVostokMapTracker/)**
+🔗 **[Live Demo](https://rockclimber147.github.io/RoadToVostokMapTracker/)**
 
 ---
 
