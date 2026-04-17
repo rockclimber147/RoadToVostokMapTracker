@@ -50,9 +50,11 @@ export default function GameMap({
   ];
 
   const [menu, setMenu] = useState<{ latlng: LatLng, x: number, y: number } | null>(null);
+  const [newestPinId, setNewestPinId] = useState<string | null>(null);
 
   const handleDeployPin = (latlng: LatLng, color: PinColor) => {
     const id = crypto.randomUUID();
+    setNewestPinId(id);
     onAddPin(latlng, color, id);
     setMenu(null);
   };
@@ -100,6 +102,8 @@ export default function GameMap({
         <PinLayer 
           pins={pins}
           colorStates={colorStates}
+          newestPinId={newestPinId}
+          setNewestPinId={setNewestPinId}
           onUpdatePin={onUpdatePin}
           onDeletePin={onDeletePin}
         />

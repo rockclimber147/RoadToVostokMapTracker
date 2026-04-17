@@ -1,3 +1,4 @@
+// src/components/map/PinLayer.tsx
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import { Marker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
@@ -8,11 +9,21 @@ import { createColoredIcon } from '../../utils/icons';
 interface PinLayerProps {
   pins: Pin[];
   colorStates: Record<PinColor, number>;
+  newestPinId: string | null;
+  setNewestPinId: (id: string | null) => void;
   onUpdatePin: (id: string, updates: Partial<Pin>) => void;
   onDeletePin: (id: string) => void;
 }
 
-export default function PinLayer({ pins, colorStates, onUpdatePin, onDeletePin }: PinLayerProps) {
+export default function PinLayer({ 
+  pins, 
+  colorStates, 
+  newestPinId, 
+  setNewestPinId, 
+  onUpdatePin, 
+  onDeletePin 
+}: PinLayerProps) {
+  
   const createClusterIcon = (cluster: any) => {
     const children = cluster.getAllChildMarkers();
 
@@ -73,6 +84,24 @@ export default function PinLayer({ pins, colorStates, onUpdatePin, onDeletePin }
               key={`pin-${pin.id}-${isFullState}`} 
               position={pin.pos}
               icon={pinIcon}
+              ref={(marker) => {
+                if (marker && pin.id === newestPinId) {
+                  setTimeout(() => {
+                    if (marker.getElement()) {
+                      marker.openPopup();
+                      setTimeout(() => {
+                        const popupNode = marker.getPopup()?.getElement();
+                        const inputElement = popupNode?.querySelector('input');
+                        if (inputElement) {
+                          inputElement.focus();
+                        }
+                      }, 50);
+                    }
+                  }, 100);
+                  
+                  setNewestPinId(null);
+                }
+              }}
             >
               <Tooltip 
                 key={`tooltip-${pin.id}-${isFullState}-${Math.random()}`} 
