@@ -30,6 +30,13 @@ export default function DataActions({ onExport, onImport, onAppend }: DataAction
           Append
         </button>
       </div>
+
+      {/* Styled Tactical Disclaimer */}
+      <div className="pt-2">
+        <p className="text-[8px] font-medium tracking-[0.15em] text-[#E0E0E0] opacity-20 text-center uppercase leading-relaxed">
+          * Fan-made tool. Not officially affiliated with Road to Vostok.
+        </p>
+      </div>
     </footer>
   );
 }
